@@ -1,6 +1,6 @@
 Puppet-SonarQube
 ================
-[![Build Status](https://travis-ci.org/mmarseglia/puppet-sonarqube.svg)](https://travis-ci.org/mmarseglia/puppet-sonarqube
+[![Build Status](https://travis-ci.org/mmarseglia/puppet-sonarqube.svg)](https://travis-ci.org/mmarseglia/puppet-sonarqube)
 
 A puppet recipe to install SonarQube (former Sonar)
 
