@@ -1,8 +1,8 @@
 # Configuration of SonarQube scanner
 class sonarqube::scanner::config (
-  $package_name = "sonar-scanner",
-  $version = "2.5",
-  $installroot = "/usr/local/",
+  $package_name = 'sonar-scanner',
+  $version = '2.5',
+  $installroot = '/usr/local/',
   $sonarqube_server = 'http://localhost:9000',
   $tmp_dir  = '/tmp',
 
