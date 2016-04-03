@@ -28,18 +28,6 @@ describe 'sonarqube' do
     it { should contain_file(sonar_properties).without_content("crowd") }
   end
 
-  context "when unzip package is not defined", :compile do
-    it { should contain_package('unzip').with_ensure('present') }
-  end
-
-  context "when unzip package is already defined", :compile do
-    let(:pre_condition) { %Q[
-      package { 'unzip': ensure => installed }
-    ] }
-
-    it { should contain_package('unzip').with_ensure('installed') }
-  end
-
   context "when ldap local users configuration is supplied", :compile do
     let(:params) { { :ldap => {
       'url'          => 'ldap://myserver.mycompany.com',

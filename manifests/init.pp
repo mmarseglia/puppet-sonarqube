@@ -63,6 +63,8 @@ class sonarqube (
     group => $group,
   }
 
+  ensure_packages(['unzip'], { 'ensure' => 'present' })
+
   $package_name = 'sonarqube'
 
   if $home != undef {
@@ -109,7 +111,7 @@ class sonarqube (
     group        => $group,
     creates      => "/usr/local/${package_name}-${version}/COPYING",
     notify       => Service['sonarqube'],
-    require      => File["${installroot}/${package_name}-${version}"],
+    require      => [ File["${installroot}/${package_name}-${version}"], Package['unzip'] ],
   }
 
   # Sonar home
