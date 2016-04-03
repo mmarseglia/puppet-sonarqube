@@ -191,11 +191,11 @@ GEM
       puppet (>= 2.7.16)
       rest-client
     puppet-lint (1.1.0)
-    puppet-syntax (2.0.0)
+    puppet-syntax (2.1.0)
       rake
     puppet_forge (1.0.4)
       her (~> 0.6)
-    puppetlabs_spec_helper (0.9.1)
+    puppetlabs_spec_helper (1.1.1)
       mocha
       puppet-lint
       puppet-syntax
@@ -261,7 +261,10 @@ DEPENDENCIES
   puppet (>= 2.7)
   puppet-blacksmith (>= 3.3.1)
   puppet-lint (>= 1.1.0)
-  puppetlabs_spec_helper (>= 0.8.0)
+  puppetlabs_spec_helper (>= 1.1.1)
   rake
   rspec-puppet (>= 1.0.0)
   simplecov
+
+BUNDLED WITH
+   1.10.5
