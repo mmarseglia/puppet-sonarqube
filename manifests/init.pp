@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 class sonarqube (
-  $version          = '5.3',
+  $version          = '4.5.7',
   $user             = 'sonar',
   $group            = 'sonar',
   $user_system      = true,

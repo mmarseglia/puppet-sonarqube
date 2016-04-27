@@ -5,8 +5,8 @@ describe 'sonarqube' do
   let(:sonar_properties) { '/usr/local/sonar/conf/sonar.properties' }
 
   context "when installing version 4", :compile do
-    let(:params) {{ :version => '4.5.5' }}
-    it { should contain_archive('/tmp/sonarqube-4.5.5.zip').with_source('https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-4.5.5.zip') }
+    let(:params) {{ :version => '4.5.7' }}
+    it { should contain_archive('/tmp/sonarqube-4.5.7.zip').with_source('https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-4.5.7.zip') }
   end
 
   context "when crowd configuration is supplied", :compile do
