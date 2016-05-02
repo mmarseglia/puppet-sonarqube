@@ -1,3 +1,83 @@
+# Class sonarqube
+#
+# Description
+# This module installs and manages Sonarqube installation.
+#
+# Parameters
+# version:
+#   version of sonarqube to install
+# user:
+#   user to run sonarqube server as
+#
+# group:
+#   group to run sonarqube server as
+#
+# user_system:
+#   unknown
+#
+# service:
+#   name of the service
+#
+# installroot:
+#   where to install the sonarqube binary
+#
+# home:
+#
+# host:
+#
+# port:
+#   port to run the service on
+#
+# portAjp:
+#
+# download_url:
+#   URL to download sonarqube from
+#
+# download_dir:
+#   where to save the sonarqube archive
+#
+# context_path:
+#
+# arch
+#
+# https
+#
+# ldap
+#
+# pam
+#
+# crowd
+#
+# jdbc
+#   Java database connection information
+#
+# log_folder
+#   where to save logs
+#
+# updatecenter
+#
+# http_proxy
+#
+# web_java_opts
+#
+# search_java_opts
+#
+# search_host
+#
+# search_port
+#
+# config
+#
+# Variables
+#
+# Usage
+#
+# include ::sonarqube
+#
+# Authors
+# mike@marseglia.org
+# Forked from MaestroDev
+#
 # Copyright 2011 MaestroDev
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
