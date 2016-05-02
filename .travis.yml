@@ -1,7 +1,4 @@
 ---
-# This file is managed centrally by modulesync
-#   https://github.com/maestrodev/puppet-modulesync
-
 before_install:
   - rm -f Gemfile.lock
 
@@ -39,14 +36,3 @@ matrix:
     - rvm: 2.1.0
       env: PUPPET_VERSION="~> 3.4.0"
 
-deploy:
-  provider: puppetforge
-  user: maestrodev
-  password:
-    secure: "Otm0EXhVvdcqG80+M7bQy6gy+xv/x2hJuQm1PyscRAX7zSnHNDgv85DniqGPxnJlLKxjrWwLwzDQ1+UO5WpaBn0/Oiv2U+M8VrmKq9/YkO3XgL93HZNmKKpJnj+SBR6ZaCml00AbwfTLOOBkUBMHwLDlpkClSvB79rYmKJxkDh0="
-  on:
-    tags: true
-    # all_branches is required to use tags
-    all_branches: true
-    # Only publish if our main Ruby target builds
-    condition: "$PUPPET_VERSION = '~> 3.6.0'"
