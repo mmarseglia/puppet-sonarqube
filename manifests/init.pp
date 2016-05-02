@@ -38,7 +38,8 @@
 #
 # context_path:
 #
-# arch
+# arch:
+#   Architechture as $::kernel-$::architechture. e.g. linux-x86-64
 #
 # https
 #
@@ -147,6 +148,7 @@ class sonarqube (
 
   $package_name = 'sonarqube'
 
+  # This directory is where we keep data
   if $home != undef {
     $real_home = $home
   } else {
@@ -181,6 +183,8 @@ class sonarqube (
     system => $user_system,
   }
 
+  sonarqube::move_to_home { [ 'data', 'extras', 'extensions', 'logs' ] :
+  } ->
   # download the sonarqube binary and unpack in the install directory
   archive { $tmpzip:
     ensure       => present,
@@ -194,16 +198,19 @@ class sonarqube (
     require      => [ File["${installroot}/${package_name}-${version}"], Package['unzip'] ],
   }
 
-  # Sonar home
+  # ensure data directory exists
   file { $real_home:
     ensure => directory,
     mode   => '0700',
   }
 
+  # ensure install directory exists
+  # also create data directories and symlink them before extracting archive
+  # otherwise symlink will fail b/c target will already exist
   file { "${installroot}/${package_name}-${version}":
     ensure => directory,
   }
-
+ 
   file { $installdir:
     ensure  => link,
     target  => "${installroot}/${package_name}-${version}",
@@ -211,15 +218,10 @@ class sonarqube (
     require => File["${installroot}/${package_name}-${version}"],
   }
 
-  #sonarqube::move_to_home { 'data': }
-  #sonarqube::move_to_home { 'extras': }
-  #sonarqube::move_to_home { 'extensions': }
-  #sonarqube::move_to_home { 'logs': }
-
   file { $script:
     mode    => '0755',
     content => template('sonarqube/sonar.sh.erb'),
-    require => File[$installdir],
+    require => Archive[$tmpzip],
   }
 
   file { "/etc/init.d/${service}":
@@ -234,19 +236,22 @@ class sonarqube (
       source => $config,
       notify => Service['sonarqube'],
       mode   => '0600',
+      require => Archive[$tmpzip],
     }
   } else {
     file { "${installdir}/conf/sonar.properties":
       content => template('sonarqube/sonar.properties.erb'),
       notify  => Service['sonarqube'],
       mode    => '0600',
+      require => Archive[$tmpzip],
     }
   }
 
   # The plugins directory.
-  #file { $plugin_dir:
-  #  ensure => directory,
-  #}
+  file { $plugin_dir:
+    ensure => directory,
+    require => Sonarqube::Move_to_home['extensions'],
+  }
 
   service { 'sonarqube':
     ensure     => running,
@@ -254,6 +259,6 @@ class sonarqube (
     hasrestart => true,
     hasstatus  => true,
     enable     => true,
-    require    => File["/etc/init.d/${service}"],
+    require    => [ Archive[$tmpzip], File["/etc/init.d/${service}"] ],
   }
 }

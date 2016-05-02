@@ -1,9 +1,11 @@
-# Class: sonarqube::runner
+# Class: sonarqube::scanner
 #
-# Install the sonar-runner
+# Description
+# Install the sonar-scanner.
+#
 class sonarqube::scanner (
     $package_name = 'sonar-scanner',
-    $version = '2.5',
+    $version = '2.6',
     $download_url = 'https://sonarsource.bintray.com/Distribution/sonar-scanner-cli',
     $installroot = '/usr/local/',
     $sonarqube_server = 'http://localhost:9000',

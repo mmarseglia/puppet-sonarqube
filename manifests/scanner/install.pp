@@ -1,7 +1,7 @@
 # Installation of SonarQube scanner
 class sonarqube::scanner::install (
   $package_name = 'sonar-scanner',
-  $version = '2.5',
+  $version = '2.6',
   $installroot = '/usr/local/',
   $download_url = 'https://sonarsource.bintray.com/Distribution/sonar-scanner-cli',
   $tmp_dir = '/tmp',
