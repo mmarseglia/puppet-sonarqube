@@ -17,7 +17,7 @@ class sonarqube::scanner::install (
     creates      => "${installroot}${package_name}-${version}",
   }
   
-  file { '/usr/local/sonar-runner':
+  file { "/usr/local/${package_name}" :
       ensure => 'link',
       target => "${installroot}${package_name}-${version}",
   }
