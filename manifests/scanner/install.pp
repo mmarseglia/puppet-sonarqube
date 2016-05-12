@@ -5,25 +5,32 @@ class sonarqube::scanner::install (
   $installroot = '/usr/local/',
   $download_url = 'https://sonarsource.bintray.com/Distribution/sonar-scanner-cli',
   $tmp_dir = '/tmp',
+  $use_package = false
 ) {
-  include ::archive
 
+  if $use_package {
+    package { $package_name:
+      ensure => $version,
+    }
+  } else {
+    include ::archive
 
-  archive { "${tmp_dir}/${package_name}-${version}.zip" :
-    ensure       => present,
-    source       => "${download_url}/${package_name}-${version}.zip",
-    extract      => true,
-    extract_path => $installroot,
-    creates      => "${installroot}${package_name}-${version}",
-  }
-  
-  file { "/usr/local/${package_name}" :
+    archive { "${tmp_dir}/${package_name}-${version}.zip" :
+      ensure       => present,
+      source       => "${download_url}/${package_name}-${version}.zip",
+      extract      => true,
+      extract_path => $installroot,
+      creates      => "${installroot}${package_name}-${version}",
+    }
+
+    file { "/usr/local/${package_name}" :
       ensure => 'link',
       target => "${installroot}${package_name}-${version}",
-  }
+    }
 
-  # Sonar settings for terminal sessions.
-  file { '/etc/profile.d/sonarhome.sh':
-    content => 'export SONAR_RUNNER_HOME=/usr/local/sonar-runner',
+    # Sonar settings for terminal sessions.
+    file { '/etc/profile.d/sonarhome.sh':
+      content => 'export SONAR_RUNNER_HOME=/usr/local/sonar-runner',
+    }
   }
 }

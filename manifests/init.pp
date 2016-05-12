@@ -132,6 +132,10 @@ class sonarqube (
   $search_host      = '127.0.0.1',
   $search_port      = '9001',
   $config           = undef,
+  $use_package      = false,
+  $package_name     = 'sonarqube',
+  $manage_repo      = false,
+  $repo_url         = $sonarqube::params::repo_url,
 ) inherits sonarqube::params {
   validate_absolute_path($download_dir)
 
@@ -146,8 +150,6 @@ class sonarqube (
 
   ensure_packages(['unzip'], { 'ensure' => 'present' })
 
-  $package_name = 'sonarqube'
-
   # This directory is where we keep data
   if $home != undef {
     $real_home = $home
@@ -155,16 +157,10 @@ class sonarqube (
     $real_home = '/var/local/sonar'
   }
 
-  Sonarqube::Move_to_home {
-    home => $real_home,
-  }
 
   $extensions_dir = "${real_home}/extensions"
-
   $plugin_dir = "${extensions_dir}/plugins"
-
   $installdir = "${installroot}/${service}"
-
   $tmpzip = "${download_dir}/${package_name}-${version}.zip"
 
   # /usr/local/sonar/bin/linux-x86-64/
@@ -183,74 +179,105 @@ class sonarqube (
     system => $user_system,
   }
 
-  sonarqube::move_to_home { [ 'data', 'extras', 'extensions', 'logs' ] :
-  } ->
-  # download the sonarqube binary and unpack in the install directory
-  archive { $tmpzip:
-    ensure       => present,
-    extract      => true,
-    extract_path => $installroot,
-    source       => "${download_url}/${package_name}-${version}.zip",
-    user         => $user,
-    group        => $group,
-    creates      => "/usr/local/${package_name}-${version}/COPYING",
-    notify       => Service['sonarqube'],
-    require      => [ File["${installroot}/${package_name}-${version}"], Package['unzip'] ],
-  }
+  if $use_package {
+    # package based installation
+    if $manage_repo {
+      class { 'sonarqube::repo':
+        before   => Package[$package_name],
+      }
+    } # only redhats for the moment - should go to its own class with the logic
 
-  # ensure data directory exists
-  file { $real_home:
-    ensure => directory,
-    mode   => '0700',
-  }
+    package { $package_name:
+      enure => $version,
+    }
 
-  # ensure install directory exists
-  # also create data directories and symlink them before extracting archive
-  # otherwise symlink will fail b/c target will already exist
-  file { "${installroot}/${package_name}-${version}":
-    ensure => directory,
-  }
- 
-  file { $installdir:
-    ensure  => link,
-    target  => "${installroot}/${package_name}-${version}",
-    notify  => Service['sonarqube'],
-    require => File["${installroot}/${package_name}-${version}"],
-  }
+  } else {
 
-  file { $script:
-    mode    => '0755',
-    content => template('sonarqube/sonar.sh.erb'),
-    require => Archive[$tmpzip],
-  }
+    Sonarqube::Move_to_home {
+      home => $real_home,
+    }
 
-  file { "/etc/init.d/${service}":
-    ensure  => link,
-    target  => $script,
-    require => File[$script],
-  }
+    #archive based installation
+    sonarqube::move_to_home { [ 'data', 'extras', 'extensions', 'logs' ] :
+    } ->
+    # download the sonarqube binary and unpack in the install directory
+    archive { $tmpzip:
+      ensure       => present,
+      extract      => true,
+      extract_path => $installroot,
+      source       => "${download_url}/${package_name}-${version}.zip",
+      user         => $user,
+      group        => $group,
+      creates      => "/usr/local/${package_name}-${version}/COPYING",
+      notify       => Service['sonarqube'],
+      require      => [ File["${installroot}/${package_name}-${version}"], Package['unzip'] ],
+    }
+
+    # ensure data directory exists
+    file { $real_home:
+      ensure => directory,
+      mode   => '0700',
+    }
+
+    # ensure install directory exists
+    # also create data directories and symlink them before extracting archive
+    # otherwise symlink will fail b/c target will already exist
+    file { "${installroot}/${package_name}-${version}":
+      ensure => directory,
+    }
+
+    file { $installdir:
+      ensure  => link,
+      target  => "${installroot}/${package_name}-${version}",
+      notify  => Service['sonarqube'],
+      require => File["${installroot}/${package_name}-${version}"],
+    }
+
+    file { $script:
+      mode    => '0755',
+      content => template('sonarqube/sonar.sh.erb'),
+      require => Archive[$tmpzip],
+    }
+
+    file { "/etc/init.d/${service}":
+      ensure  => link,
+      target  => $script,
+      require => File[$script],
+    }
+  }   # end installation
 
   # Sonar configuration files
+
+  $real_require = $use_package ? {
+    true  => "Package[$package_name]",
+    false => "Archive[$tmpzip]",
+  }
+
   if $config != undef {
     file { "${installdir}/conf/sonar.properties":
       source => $config,
       notify => Service['sonarqube'],
       mode   => '0600',
-      require => Archive[$tmpzip],
+      require => $real_require,
+      #require => Archive[$tmpzip],
     }
   } else {
     file { "${installdir}/conf/sonar.properties":
       content => template('sonarqube/sonar.properties.erb'),
       notify  => Service['sonarqube'],
       mode    => '0600',
-      require => Archive[$tmpzip],
+      require => $real_require,
+      #require => Archive[$tmpzip],
     }
   }
 
   # The plugins directory.
   file { $plugin_dir:
-    ensure => directory,
-    require => Sonarqube::Move_to_home['extensions'],
+    ensure  => directory,
+    require => $use_package ? {
+      true    => undef,
+      false   => Sonarqube::Move_to_home['extensions'],
+    }
   }
 
   service { 'sonarqube':
@@ -259,6 +286,9 @@ class sonarqube (
     hasrestart => true,
     hasstatus  => true,
     enable     => true,
-    require    => [ Archive[$tmpzip], File["/etc/init.d/${service}"] ],
+    require    => $use_package ? {
+      true     => Package[$package_name],
+      false    => [ Archive[$tmpzip], File["/etc/init.d/${service}"] ],
+    }
   }
 }

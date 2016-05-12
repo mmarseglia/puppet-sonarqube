@@ -21,7 +21,18 @@ class sonarqube::params {
       default  => 'universal-32',
     }
   }
-  
+
   $arch = "${arch1}-${arch2}"
 
+  case $::osfamily {
+    'RedHat','Suse': {
+      $repo_url = 'http://downloads.sourceforge.net/project/sonar-pkg/rpm'
+    }
+    'Debian': {
+      $repo_url = 'http://downloads.sourceforge.net/project/sonar-pkg/deb'
+    }
+    default: {
+      fail('Only repos for Redhat, Debian en Suse are available')
+    }
+  }
 }
