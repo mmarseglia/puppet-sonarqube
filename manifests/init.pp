@@ -2,82 +2,154 @@
 #
 # Description
 # This module installs and manages Sonarqube installation.
+# By default the installation is done using the sonarqube archive.
+# When setting the *use_package* parameter to 'true', a package based 
+# installation is performed. With this installation, this mosule does not
+# manage a sperate home fdir for the sonar user.
 #
 # Parameters
-# version:
-#   version of sonarqube to install
-# user:
-#   user to run sonarqube server as
 #
-# group:
-#   group to run sonarqube server as
+# [*version*]
+#   Version of sonarqube to install. Check the version format when installing
+#   from archive or from package
+#   Default: 4.5.7
+# [*user*]
+#   User to run sonarqube server as
+#   Default: sonar
 #
-# user_system:
-#   unknown
+# [*group*]
+#   Group to run sonarqube server as
+#   Default: Sonar
 #
-# service:
-#   name of the service
+# [*user_system*]:
+#   Should the sonar user and group be handles as a system user ? (true, false)
+#   Default: true
 #
-# installroot:
-#   where to install the sonarqube binary
+# [*service*]
+#   Name of the service
+#   Default: sonar
 #
-# home:
+# [*installroot*]
+#   Base directory where to install the sonarqube binary
 #
-# host:
+# [*home*]
+#   Home directory of the sonar user.  Only used when installing from archive.
+#   'data', 'extras', 'extensions', 'logs' subdirectory form the arcive will be 
+#   moved in this home directory.
+#   Default: /var/local/sonar
 #
-# port:
-#   port to run the service on
+# [*host*]
+# Thhe host/ipaddress of the sonarqube webservice.  Used in the sonar.properties template.
+# Default: undef
 #
-# portAjp:
+# [*port*]
+#   Port to run the service on. Used in the sonar.properties template.
+#   Default: 9000
 #
-# download_url:
-#   URL to download sonarqube from
+# [*portAjp*]
+#   Used in the sonar.properties template.
+#   Default: -1
 #
-# download_dir:
+# [*download_url*]
+#   URL to download sonarqube archive from.
+#   Default: https://sonarsource.bintray.com/Distribution/sonarqube
+#
+# [*download_dir*]
 #   where to save the sonarqube archive
+#   Default: /tmp
 #
-# context_path:
+# [*context_path*]
+#   Used in the sonar.properties template.
+#   Default: undef
 #
-# arch:
+# [*arch*]
 #   Architechture as $::kernel-$::architechture. e.g. linux-x86-64
+#   Default: see sonarqube::params
 #
-# https
+# [*https*]
+#   Used in the sonar.properties template.
+#   Default: {} 
 #
-# ldap
+# [*ldap*]
+#   Used in the sonar.properties template.
+#   ldap and pam are mutually exclusive. Setting $ldap will annihilate the setting of $pam
+#   Default: {}
 #
-# pam
+# [*pam*]
+#   Used in the sonar.properties template.
+#   ldap and pam are mutually exclusive. Setting $ldap will annihilate the setting of $pam
+#   Default: {}
 #
-# crowd
+# [*crowd*]
+#   Used in the sonar.properties template.
+#   Default: {}
 #
-# jdbc
+# [*jdbc*]
 #   Java database connection information
 #
-# log_folder
-#   where to save logs
+# [*log_folder*]
+#   where to save logs. Used in the logback.xml template.
+#   Default: $home/logs
 #
-# updatecenter
+# [*updatecenter*]
+#    Used in the sonar.properties template. Boolean
+#    Default: true
 #
-# http_proxy
+# [*http_proxy*]
+#   Used in the sonar.properties template.
+#   Default: {}
 #
-# web_java_opts
+# [*web_java_opts*]
+#   Used in the sonar.properties template.
+#   Default: undef
 #
-# search_java_opts
+# [*search_java_opts*]
+#   Used in the sonar.properties template.
+#   Default: undef
 #
-# search_host
+# [*search_host*]
+#   Used in the sonar.properties template.
+#   Default: 127.0.0.1
 #
-# search_port
+# [*search_port*]
+#   Used in the sonar.properties template.
+#   Default: 9001
 #
-# config
+# [*config*]
+#   Puppet uri (as in the source attribute of the file resource) of a custom sonar.properties file.
+#   Default: undef
 #
-# Variables
+# [*use_package]
+#    Boolean.  Wether to install from a package.  Only rpm end deb packages are supported.
+#    Default: false
+#
+# [*package_name*]
+#   The name of the package to be isntalled.
+#   Default: sonarqube
+#
+# [*manage_repo*]
+#    Boolean.  Wether to install the repo configuration to install usin a package.
+#    Requires following module as dependencies:
+#    * danin/zypprepo
+#    * puppetlabs/apt
+#
+# [*repo_url*]
+#    The url to be used in the repo configuration.
+#    Default: see sonarqube::params
 #
 # Usage
+# =====
 #
 # include ::sonarqube
 #
 # Authors
+# =======
+#
 # mike@marseglia.org
 # Forked from MaestroDev
+#
+# License
+# =======
 #
 # Copyright 2011 MaestroDev
 #
@@ -97,9 +169,10 @@ class sonarqube (
   $user             = 'sonar',
   $group            = 'sonar',
   $user_system      = true,
-  $service          = 'sonar',
+  $service          = $sonarqube::params::service,
   $installroot      = '/usr/local',
-  $home             = undef,
+  $packageroot      = '/opt',
+  $home             = "${sonarqube::params::home_base}/${sonarqube::params::service}",
   $host             = undef,
   $port             = 9000,
   $portAjp          = -1,
@@ -123,7 +196,7 @@ class sonarqube (
     min_evictable_idle_time_millis    => '600000',
     time_between_eviction_runs_millis => '30000',
   },
-  $log_folder       = '/var/local/sonar/logs',
+  $log_folder       = "${sonarqube::params::home_base}/${sonarqube::params::service}/logs",
   $updatecenter     = true,
   $http_proxy       = {},
   $profile          = false,
@@ -132,7 +205,12 @@ class sonarqube (
   $search_host      = '127.0.0.1',
   $search_port      = '9001',
   $config           = undef,
+  $use_package      = false,
+  $package_name     = 'sonarqube',
+  $manage_repo      = false,
+  $repo_url         = $sonarqube::params::repo_url,
 ) inherits sonarqube::params {
+
   validate_absolute_path($download_dir)
 
   Exec {
@@ -144,27 +222,16 @@ class sonarqube (
     group => $group,
   }
 
-  ensure_packages(['unzip'], { 'ensure' => 'present' })
-
-  $package_name = 'sonarqube'
-
-  # This directory is where we keep data
-  if $home != undef {
-    $real_home = $home
+  if $use_package {
+    validate_absolute_path($packageroot)
+    $installdir = "${packageroot}/${service}"
+    $extensions_dir = "${installdir}/extensions"
   } else {
-    $real_home = '/var/local/sonar'
+    validate_absolute_path($installroot)
+    $installdir = "${installroot}/${service}"
+    $extensions_dir = "${home}/extensions"
   }
-
-  Sonarqube::Move_to_home {
-    home => $real_home,
-  }
-
-  $extensions_dir = "${real_home}/extensions"
-
   $plugin_dir = "${extensions_dir}/plugins"
-
-  $installdir = "${installroot}/${service}"
-
   $tmpzip = "${download_dir}/${package_name}-${version}.zip"
 
   # /usr/local/sonar/bin/linux-x86-64/
@@ -173,7 +240,7 @@ class sonarqube (
   # create user, group to run sonarqube
   user { $user:
     ensure     => present,
-    home       => $real_home,
+    home       => $home,
     managehome => false,
     system     => $user_system,
   }
@@ -183,74 +250,117 @@ class sonarqube (
     system => $user_system,
   }
 
-  sonarqube::move_to_home { [ 'data', 'extras', 'extensions', 'logs' ] :
-  } ->
-  # download the sonarqube binary and unpack in the install directory
-  archive { $tmpzip:
-    ensure       => present,
-    extract      => true,
-    extract_path => $installroot,
-    source       => "${download_url}/${package_name}-${version}.zip",
-    user         => $user,
-    group        => $group,
-    creates      => "/usr/local/${package_name}-${version}/COPYING",
-    notify       => Service['sonarqube'],
-    require      => [ File["${installroot}/${package_name}-${version}"], Package['unzip'] ],
-  }
+  if $use_package {
+    # package based installation
+    if $manage_repo {
+      class { 'sonarqube::repo':
+        before   => Package[$package_name],
+      }
+    } # only redhats for the moment - should go to its own class with the logic
 
-  # ensure data directory exists
-  file { $real_home:
-    ensure => directory,
-    mode   => '0700',
-  }
+    package { $package_name:
+      ensure  => $version,
+    }
 
-  # ensure install directory exists
-  # also create data directories and symlink them before extracting archive
-  # otherwise symlink will fail b/c target will already exist
-  file { "${installroot}/${package_name}-${version}":
-    ensure => directory,
-  }
- 
-  file { $installdir:
-    ensure  => link,
-    target  => "${installroot}/${package_name}-${version}",
-    notify  => Service['sonarqube'],
-    require => File["${installroot}/${package_name}-${version}"],
-  }
+  } else {
 
-  file { $script:
-    mode    => '0755',
-    content => template('sonarqube/sonar.sh.erb'),
-    require => Archive[$tmpzip],
-  }
+    #archive based installation
+    ensure_packages(['unzip'], { 'ensure' => 'present' })
 
-  file { "/etc/init.d/${service}":
-    ensure  => link,
-    target  => $script,
-    require => File[$script],
-  }
+    # ensure data directory exists
+    # moved outside the install dir
+    # only when installing from archive
+    file { $home:
+      ensure => directory,
+      mode   => '0700',
+    }
+
+    Sonarqube::Move_to_home {
+      home => $home,
+    }
+
+    sonarqube::move_to_home { [ 'data', 'extras', 'extensions', 'logs' ] : }
+
+    # download the sonarqube binary and unpack in the install directory
+    archive { $tmpzip:
+      ensure       => present,
+      extract      => true,
+      extract_path => $installroot,
+      source       => "${download_url}/${package_name}-${version}.zip",
+      user         => $user,
+      group        => $group,
+      creates      => "/usr/local/${package_name}-${version}/COPYING",
+      notify       => Service['sonarqube'],
+      require      => [ File["${installroot}/${package_name}-${version}"], Package['unzip'],
+                        Sonarqube::Move_to_home['data', 'extras', 'extensions', 'logs'] ],
+    }
+
+    # ensure install directory exists
+    # also create data directories and symlink them before extracting archive
+    # otherwise symlink will fail b/c target will already exist
+    file { "${installroot}/${package_name}-${version}":
+      ensure => directory,
+    }
+
+    file { $installdir:
+      ensure  => link,
+      target  => "${installroot}/${package_name}-${version}",
+      notify  => Service['sonarqube'],
+      require => File["${installroot}/${package_name}-${version}"],
+    }
+
+    file { $script:
+      mode    => '0755',
+      content => template('sonarqube/sonar.sh.erb'),
+      require => Archive[$tmpzip],
+    }
+
+    file { "/etc/init.d/${service}":
+      ensure  => link,
+      target  => $script,
+      require => File[$script],
+    }
+
+    # The plugins directory.
+    file { $plugin_dir:
+      ensure  => directory,
+      require => Sonarqube::Move_to_home['extensions'],
+    }
+  }   # end installation
 
   # Sonar configuration files
+
+  $real_require = $use_package ? {
+    true  => "Package[$package_name]",
+    false => "Archive[$tmpzip]",
+  }
+
   if $config != undef {
     file { "${installdir}/conf/sonar.properties":
       source => $config,
       notify => Service['sonarqube'],
       mode   => '0600',
-      require => Archive[$tmpzip],
+      require => $real_require,
     }
   } else {
     file { "${installdir}/conf/sonar.properties":
       content => template('sonarqube/sonar.properties.erb'),
       notify  => Service['sonarqube'],
       mode    => '0600',
-      require => Archive[$tmpzip],
+      require => $real_require,
     }
   }
-
-  # The plugins directory.
-  file { $plugin_dir:
-    ensure => directory,
-    require => Sonarqube::Move_to_home['extensions'],
+  if $::systemd {
+    include ::systemd
+    file { "/usr/lib/systemd/system/${service}.service":
+      ensure  => file,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => template("${module_name}/sonarqube.systemd.erb"),
+      notify  => Exec['systemctl-daemon-reload'],
+      before  => Service['sonarqube'],
+    }
   }
 
   service { 'sonarqube':
@@ -259,6 +369,9 @@ class sonarqube (
     hasrestart => true,
     hasstatus  => true,
     enable     => true,
-    require    => [ Archive[$tmpzip], File["/etc/init.d/${service}"] ],
+    require    => $use_package ? {
+      true     => Package[$package_name],
+      false    => [ Archive[$tmpzip], File["/etc/init.d/${service}"] ],
+    }
   }
 }
