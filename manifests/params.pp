@@ -29,7 +29,6 @@ class sonarqube::params {
   $service   = 'sonar'
   $home_base = '/var/local'
 
-
   case $::osfamily {
     'RedHat','Suse': {
       $repo_url = 'http://downloads.sourceforge.net/project/sonar-pkg/rpm'

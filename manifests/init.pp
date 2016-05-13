@@ -5,7 +5,7 @@
 # By default the installation is done using the sonarqube archive.
 # When setting the *use_package* parameter to 'true', a package based 
 # installation is performed. With this installation, this mosule does not
-# manage a sperate home fdir for the sonar user.
+# manage a seperate home dir for the sonar user.
 #
 # Parameters
 #
@@ -189,7 +189,7 @@ class sonarqube (
     url                               => 'jdbc:h2:tcp://localhost:9092/sonar',
     username                          => 'sonar',
     password                          => 'sonar',
-    max_active                        => '50',
+    max_activ+e                        => '50',
     max_idle                          => '5',
     min_idle                          => '2',
     max_wait                          => '5000',
@@ -232,6 +232,8 @@ class sonarqube (
     $extensions_dir = "${home}/extensions"
   }
   $plugin_dir = "${extensions_dir}/plugins"
+
+
   $tmpzip = "${download_dir}/${package_name}-${version}.zip"
 
   # /usr/local/sonar/bin/linux-x86-64/
@@ -253,13 +255,13 @@ class sonarqube (
   if $use_package {
     # package based installation
     if $manage_repo {
-      class { 'sonarqube::repo':
+      class { '::sonarqube::repo':
         before   => Package[$package_name],
       }
     } # only redhats for the moment - should go to its own class with the logic
 
     package { $package_name:
-      ensure  => $version,
+      enure => $version,
     }
 
   } else {
@@ -324,22 +326,25 @@ class sonarqube (
     # The plugins directory.
     file { $plugin_dir:
       ensure  => directory,
-      require => Sonarqube::Move_to_home['extensions'],
+      require => $use_package ? {
+        true  => undef,
+        false => Sonarqube::Move_to_home['extensions'],
+      },
     }
   }   # end installation
 
   # Sonar configuration files
 
   $real_require = $use_package ? {
-    true  => "Package[$package_name]",
-    false => "Archive[$tmpzip]",
+    true  => "Package[${package_name}]",
+    false => "Archive[${tmpzip}]",
   }
 
   if $config != undef {
     file { "${installdir}/conf/sonar.properties":
-      source => $config,
-      notify => Service['sonarqube'],
-      mode   => '0600',
+      source  => $config,
+      notify  => Service['sonarqube'],
+      mode    => '0600',
       require => $real_require,
     }
   } else {
@@ -360,6 +365,7 @@ class sonarqube (
       content => template("${module_name}/sonarqube.systemd.erb"),
       notify  => Exec['systemctl-daemon-reload'],
       before  => Service['sonarqube'],
+      #require => Archive[$tmpzip],
     }
   }
 
@@ -370,8 +376,8 @@ class sonarqube (
     hasstatus  => true,
     enable     => true,
     require    => $use_package ? {
-      true     => Package[$package_name],
-      false    => [ Archive[$tmpzip], File["/etc/init.d/${service}"] ],
-    }
+      true  => Package[$package_name],
+      false => [ Archive[$tmpzip], File["/etc/init.d/${service}"] ],
+    },
   }
 }
