@@ -252,6 +252,14 @@ class sonarqube (
     system => $user_system,
   }
 
+  # ensure data directory exists
+  # moved outside the install dir
+  # also needed for the package, since used for PID file
+  file { $home:
+    ensure => directory,
+    mode   => '0700',
+  }
+
   if $use_package {
     # package based installation
     if $manage_repo {
@@ -261,21 +269,13 @@ class sonarqube (
     } # only redhats for the moment - should go to its own class with the logic
 
     package { $package_name:
-      enure => $version,
+      ensure => $version,
     }
 
   } else {
 
     #archive based installation
     ensure_packages(['unzip'], { 'ensure' => 'present' })
-
-    # ensure data directory exists
-    # moved outside the install dir
-    # only when installing from archive
-    file { $home:
-      ensure => directory,
-      mode   => '0700',
-    }
 
     Sonarqube::Move_to_home {
       home => $home,
@@ -311,18 +311,6 @@ class sonarqube (
       require => File["${installroot}/${package_name}-${version}"],
     }
 
-    file { $script:
-      mode    => '0755',
-      content => template('sonarqube/sonar.sh.erb'),
-      require => Archive[$tmpzip],
-    }
-
-    file { "/etc/init.d/${service}":
-      ensure  => link,
-      target  => $script,
-      require => File[$script],
-    }
-
     # The plugins directory.
     file { $plugin_dir:
       ensure  => directory,
@@ -355,6 +343,19 @@ class sonarqube (
       require => $real_require,
     }
   }
+
+  file { $script:
+    mode    => '0755',
+    content => template('sonarqube/sonar.sh.erb'),
+    require => $real_require,
+  }
+
+  file { "/etc/init.d/${service}":
+    ensure  => link,
+    target  => $script,
+    require => $real_require,
+  }
+
   if $::systemd {
     include ::systemd
     file { "/usr/lib/systemd/system/${service}.service":

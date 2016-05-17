@@ -4,5 +4,8 @@ fixtures:
     java: "https://github.com/mmarseglia/puppetlabs-java.git"
     stdlib: "git://github.com/puppetlabs/puppetlabs-stdlib.git"
     mysql: "https://github.com/puppetlabs/puppetlabs-mysql.git"
+    systemd: "https://github.com/camptocamp/puppet-systemd"
+    apt: "https://github.com/puppetlabs/puppetlabs-apt"
+    zypprepo: "https://github.com/deadpoint/puppet-zypprepo"
   symlinks:
     sonarqube: "#{source_dir}"
