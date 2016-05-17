@@ -189,7 +189,7 @@ class sonarqube (
     url                               => 'jdbc:h2:tcp://localhost:9092/sonar',
     username                          => 'sonar',
     password                          => 'sonar',
-    max_activ+e                        => '50',
+    max_active                        => '50',
     max_idle                          => '5',
     min_idle                          => '2',
     max_wait                          => '5000',
