@@ -37,7 +37,7 @@ class sonarqube::params {
       $repo_url = 'http://downloads.sourceforge.net/project/sonar-pkg/deb'
     }
     default: {
-      fail('Only repos for Redhat, Debian en Suse are available')
+      $repo_url = undef
     }
   }
 }

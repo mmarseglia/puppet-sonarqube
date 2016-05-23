@@ -6,7 +6,7 @@
 class sonarqube::scanner::config (
   $package_name = 'sonar-scanner',
   $version = '2.6',
-  $installroot = '/usr/local/',
+  $installroot = '/usr/local',
   $sonarqube_server = 'http://localhost:9000',
   $use_package = false,
   $jdbc = {},
@@ -20,6 +20,7 @@ class sonarqube::scanner::config (
 
   # Sonar Runner configuration file
   file { "${_installdir}/conf/sonar-scanner.properties":
+    ensure  => file,
     content => template('sonarqube/sonar-scanner.properties.erb'),
     require => Class['sonarqube::scanner::install'],
   }

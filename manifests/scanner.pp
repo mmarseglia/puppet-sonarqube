@@ -101,7 +101,7 @@ class sonarqube::scanner (
     $package_name     = 'sonar-scanner',
     $version          = '2.6',
     $download_url     = 'https://sonarsource.bintray.com/Distribution/sonar-scanner-cli',
-    $installroot      = '/usr/local/',
+    $installroot      = '/usr/local',
     $sonarqube_server = 'http://localhost:9000',
     $use_package      = false,
     $manage_profile   = true,

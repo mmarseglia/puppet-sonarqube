@@ -264,6 +264,7 @@ class sonarqube (
     # package based installation
     if $manage_repo {
       class { '::sonarqube::repo':
+        repo_url => $repo_url,
         before   => Package[$package_name],
       }
     } # only redhats for the moment - should go to its own class with the logic
@@ -311,13 +312,9 @@ class sonarqube (
       require => File["${installroot}/${package_name}-${version}"],
     }
 
-    # The plugins directory.
     file { $plugin_dir:
       ensure  => directory,
-      require => $use_package ? {
-        true  => undef,
-        false => Sonarqube::Move_to_home['extensions'],
-      },
+      require => Sonarqube::Move_to_home['extensions'],
     }
   }   # end installation
 
@@ -337,6 +334,7 @@ class sonarqube (
     }
   } else {
     file { "${installdir}/conf/sonar.properties":
+      ensure  => file,
       content => template('sonarqube/sonar.properties.erb'),
       notify  => Service['sonarqube'],
       mode    => '0600',
@@ -345,6 +343,7 @@ class sonarqube (
   }
 
   file { $script:
+    ensure  => file,
     mode    => '0755',
     content => template('sonarqube/sonar.sh.erb'),
     require => $real_require,
@@ -357,17 +356,16 @@ class sonarqube (
   }
 
   if $::systemd {
-    include ::systemd
-    file { "/usr/lib/systemd/system/${service}.service":
-      ensure  => file,
-      owner   => 'root',
-      group   => 'root',
-      mode    => '0644',
+    systemd::unit_file{"${service}.service":
+      path    => '/usr/lib/systemd/system/',
       content => template("${module_name}/sonarqube.systemd.erb"),
-      notify  => Exec['systemctl-daemon-reload'],
       before  => Service['sonarqube'],
-      #require => Archive[$tmpzip],
     }
+  }
+
+  $_service_require = $use_package ? {
+    true  => [ Package[$package_name], File["/etc/init.d/${service}"] ],
+    false => [ Archive[$tmpzip], File["/etc/init.d/${service}"] ],
   }
 
   service { 'sonarqube':
@@ -376,9 +374,6 @@ class sonarqube (
     hasrestart => true,
     hasstatus  => true,
     enable     => true,
-    require    => $use_package ? {
-      true  => Package[$package_name],
-      false => [ Archive[$tmpzip], File["/etc/init.d/${service}"] ],
-    },
+    require    => $_service_require,
   }
 }

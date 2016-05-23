@@ -7,7 +7,7 @@ class sonarqube::scanner::install (
   $package_name   = 'sonar-scanner',
   $version        = '2.6',
   $download_url   = 'https://sonarsource.bintray.com/Distribution/sonar-scanner-cli',
-  $installroot    = '/usr/local/',
+  $installroot    = '/usr/local',
   $use_package    = false,
   $manage_profile = true,
   $manage_link    = true,
@@ -30,7 +30,7 @@ class sonarqube::scanner::install (
       source       => "${download_url}/${package_name}-${version}.zip",
       extract      => true,
       extract_path => $installroot,
-      creates      => "${installroot}${package_name}-${version}",
+      creates      => "${installroot}/${package_name}-${version}",
       require      => Package['unzip'],
     }
   }
@@ -42,7 +42,7 @@ class sonarqube::scanner::install (
     $target_name = $installroot
   } else {
     $link_name   = "${installroot}/sonar-scanner"
-    $target_name = "${installroot}${package_name}-${version}"
+    $target_name = "${installroot}/${package_name}-${version}"
   }
 
   if $manage_link {
@@ -59,6 +59,7 @@ class sonarqube::scanner::install (
       false => "export SONAR_SCANNER_HOME=${target_name}",
     }
     file { '/etc/profile.d/sonarhome.sh':
+      ensure  => file,
       content => $_content,
     }
   }
