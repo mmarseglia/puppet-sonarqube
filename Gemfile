@@ -1,35 +1,16 @@
-source ENV['GEM_SOURCE'] || "https://rubygems.org"
+# This file is managed centrally by modulesync
+#   https://github.com/maestrodev/puppet-modulesync
 
-group :test do
-  gem "rake"
-  gem "puppet", ENV['PUPPET_GEM_VERSION'] || '~> 3.8.0'
-  gem "rspec", '< 3.2.0'
-  gem "rspec-puppet", :git => 'https://github.com/rodjek/rspec-puppet.git'
-  gem "puppetlabs_spec_helper"
-  gem "metadata-json-lint"
-  gem "rspec-puppet-facts"
-  gem 'rubocop', '0.33.0'
-  gem 'simplecov', '>= 0.11.0'
-  gem 'simplecov-console'
+source 'https://rubygems.org'
 
-  gem "puppet-lint-absolute_classname-check"
-  gem "puppet-lint-leading_zero-check"
-  gem "puppet-lint-trailing_comma-check"
-  gem "puppet-lint-version_comparison-check"
-  gem "puppet-lint-classes_and_types_beginning_with_digits-check"
-  gem "puppet-lint-unquoted_string-check"
-  gem 'puppet-lint-resource_reference_syntax'
-end
+gem 'puppet', ENV['PUPPET_VERSION'] || '>= 3.0', :require => false
 
-group :development do
-  gem "travis"
-  gem "travis-lint"
-  gem "puppet-blacksmith"
-  gem "guard-rake"
-end
+gem 'rake', :require => false
+gem 'rspec-puppet', '>= 2.4.0', :require => false
+gem 'puppetlabs_spec_helper', '>= 1.1.1', :require => false
+gem 'puppet-lint', '>= 1.1.0', :require => false
+gem 'simplecov', :require => false
+gem 'puppet-blacksmith', '>= 3.3.1', :require => false
+gem 'beaker-rspec', '>= 3.0.0', :require => false
 
-group :system_tests do
-  gem "beaker"
-  gem "beaker-rspec"
-  gem "beaker-puppet_install_helper"
-end
+# vim:ft=ruby
