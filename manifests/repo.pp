@@ -23,7 +23,7 @@ class sonarqube::repo (
       apt::source { 'sonarqube':
         location => $repo_url,
         repos    => 'Sonarque debian package repo',
-        release  => 'binary'
+        release  => 'binary',
       }
     }
     'Suse': {

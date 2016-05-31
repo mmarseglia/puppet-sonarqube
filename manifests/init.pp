@@ -278,7 +278,7 @@ class sonarqube (
     #archive based installation
     ensure_packages(['unzip'], { 'ensure' => 'present' })
 
-    Sonarqube::Move_to_home {
+    Sonarqube::Move_to_home{
       home => $home,
     }
 
