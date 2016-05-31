@@ -35,7 +35,7 @@ class sonarqube::scanner::install (
     }
   }
 
-  ## generate ths correct values depending on the settings
+  ## generate the correct values depending on the settings
   if $use_package {
     $_basedir    = dirname($installroot)
     $link_name   = "${_basedir}/sonar-scanner"
