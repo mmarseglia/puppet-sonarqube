@@ -6,39 +6,39 @@ rvm:
   - "2.0.0"
 
 env:
-  - PUPPET_VERSION="~> 4.5.0"
-  - PUPPET_VERSION="~> 4.4.0"
-  - PUPPET_VERSION="~> 4.3.0"
-  - PUPPET_VERSION="~> 4.2.0"
-  - PUPPET_VERSION="~> 4.1.0"
-  - PUPPET_VERSION="~> 3.8.0"
-  - PUPPET_VERSION="~> 3.7.0"
-  - PUPPET_VERSION="~> 3.6.0"
-  - PUPPET_VERSION="~> 3.5.0"
+  - PUPPET_GEM_VERSION="~> 4.5.0"
+  - PUPPET_GEM_VERSION="~> 4.4.0"
+  - PUPPET_GEM_VERSION="~> 4.3.0"
+  - PUPPET_GEM_VERSION="~> 4.2.0"
+  - PUPPET_GEM_VERSION="~> 4.1.0"
+  - PUPPET_GEM_VERSION="~> 3.8.0"
+  - PUPPET_GEM_VERSION="~> 3.7.0"
+  - PUPPET_GEM_VERSION="~> 3.6.0"
+  - PUPPET_GEM_VERSION="~> 3.5.0"
 
 matrix:
   allow_failures:
     - rvm: 2.0.0
-      env: PUPPET_VERSION="~> 4.5.0"
+      env: PUPPET_GEM_VERSION="~> 4.5.0"
   exclude:
     # No support for Ruby 2.0 before Puppet 3.2
     - rvm: 2.0.0
-      env: PUPPET_VERSION="~> 2.7.0"
+      env: PUPPET_GEM_VERSION="~> 2.7.0"
     - rvm: 2.0.0
-      env: PUPPET_VERSION="~> 3.0.0"
+      env: PUPPET_GEM_VERSION="~> 3.0.0"
     - rvm: 2.0.0
-      env: PUPPET_VERSION="~> 3.1.0"
+      env: PUPPET_GEM_VERSION="~> 3.1.0"
     # Puppet < 3.5.0 is broken under ruby 2.1 https://tickets.puppetlabs.com/browse/PUP-1243
     - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 2.7.0"
+      env: PUPPET_GEM_VERSION="~> 2.7.0"
     - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 3.0.0"
+      env: PUPPET_GEM_VERSION="~> 3.0.0"
     - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 3.1.0"
+      env: PUPPET_GEM_VERSION="~> 3.1.0"
     - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 3.2.0"
+      env: PUPPET_GEM_VERSION="~> 3.2.0"
     - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 3.3.0"
+      env: PUPPET_GEM_VERSION="~> 3.3.0"
     - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 3.4.0"
+      env: PUPPET_GEM_VERSION="~> 3.4.0"
 
