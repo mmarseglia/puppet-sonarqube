@@ -4,12 +4,7 @@
 require 'rake/clean'
 require 'puppetlabs_spec_helper/rake_tasks'
 require 'puppet-lint/tasks/puppet-lint'
-# These gems aren't always present, for instance
-# on Travis with --without development
-begin
-  require 'puppet_blacksmith/rake_tasks'
-  rescue LoadError
-end
+require 'puppet_blacksmith/rake_tasks'
 
 CLEAN.include('spec/fixtures/manifests/', 'spec/fixtures/modules/', 'doc', 'pkg')
 CLOBBER.include('.tmp', '.librarian')
