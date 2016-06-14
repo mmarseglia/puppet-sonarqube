@@ -1,16 +1,27 @@
 # Configuration of SonarQube scanner
+#
+# This is a private class.  
+# see sonarqube::scanner class for parameter explenation
+#
 class sonarqube::scanner::config (
   $package_name = 'sonar-scanner',
   $version = '2.6',
-  $installroot = '/usr/local/',
+  $installroot = '/usr/local',
   $sonarqube_server = 'http://localhost:9000',
-  $tmp_dir  = '/tmp',
-  $jdbc = { },
-
+  $use_package = false,
+  $jdbc = {},
 ) {
+
+  if $use_package {
+    $_installdir = $installroot
+  } else {
+    $_installdir = "${installroot}/${package_name}-${version}"
+  }
+
   # Sonar Runner configuration file
-  file { "${installroot}/${package_name}-${version}/conf/sonar-runner.properties":
-    content => template('sonarqube/sonar-runner.properties.erb'),
-    require => Archive["${tmp_dir}/${package_name}-${version}.zip"],
+  file { "${_installdir}/conf/sonar-scanner.properties":
+    ensure  => file,
+    content => template('sonarqube/sonar-scanner.properties.erb'),
+    require => Class['sonarqube::scanner::install'],
   }
 }

@@ -3,13 +3,13 @@ define sonarqube::move_to_home (
   $home,
 ) {
   file { "${home}/${name}":
-    ensure	=> directory,
-    require	=> File[$home],
+    ensure  => directory,
+    require => File[$home],
   }
 
   file { "${sonarqube::installdir}/${name}":
-    ensure 	=> link,
-    target 	=> "${home}/${name}",
-    require	=> [ File[$sonarqube::installdir], File["${home}/${name}"] ],
+    ensure  => link,
+    target  => "${home}/${name}",
+    require => [ File[$sonarqube::installdir], File["${home}/${name}"] ],
   }
 }

@@ -1,38 +1,33 @@
 ---
-before_install:
-  - rm -f Gemfile.lock
-
-rvm:
-  - "2.0.0"
-
-env:
-  - PUPPET_VERSION="~> 3.7.0"
-  - PUPPET_VERSION="~> 3.6.0"
-  - PUPPET_VERSION="~> 3.5.0"
-  - PUPPET_VERSION="~> 3.4.0"
-  - PUPPET_VERSION="~> 3.3.0"
-  - PUPPET_VERSION="~> 3.2.0"
-
+language: ruby
+sudo: false
+# cache: bundler
+notifications:
+  email: false
+bundler_args: --without system_tests
+before_install: rm Gemfile.lock || true
+#  script: bundle exec rake test
 matrix:
-  exclude:
-    # No support for Ruby 2.0 before Puppet 3.2
-    - rvm: 2.0.0
-      env: PUPPET_VERSION="~> 2.7.0"
-    - rvm: 2.0.0
-      env: PUPPET_VERSION="~> 3.0.0"
-    - rvm: 2.0.0
-      env: PUPPET_VERSION="~> 3.1.0"
-    # Puppet < 3.5.0 is broken under ruby 2.1 https://tickets.puppetlabs.com/browse/PUP-1243
-    - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 2.7.0"
-    - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 3.0.0"
-    - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 3.1.0"
-    - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 3.2.0"
-    - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 3.3.0"
-    - rvm: 2.1.0
-      env: PUPPET_VERSION="~> 3.4.0"
-
+  fast_finish: true
+  include:
+  - rvm: 1.9.3
+    env: PUPPET_GEM_VERSION="~> 3.0" STRICT_VARIABLES="yes"
+  - rvm: 1.9.3
+    env: PUPPET_GEM_VERSION="~> 3.0" STRICT_VARIABLES="yes" FUTURE_PARSER="yes"
+  - rvm: 1.9.3
+    env: PUPPET_GEM_VERSION="~> 4.0" STRICT_VARIABLES="yes" HIERA_GEM_VERSION="3.0.6'
+  - rvm: 2.1.0
+    env: PUPPET_GEM_VERSION="~> 3.0" STRICT_VARIABLES="yes"
+  - rvm: 2.1.0
+    env: PUPPET_GEM_VERSION="~> 3.0" STRICT_VARIABLES="yes" FUTURE_PARSER="yes"
+  - rvm: 2.1.0
+    env: PUPPET_GEM_VERSION="~> 4.0" STRICT_VARIABLES="yes" HIERA_GEM_VERSION="3.0.6' 
+  - rvm: 2.3.0
+    env: PUPPET_GEM_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK="test" HIERA_GEM_VERSION="3.0.6'
+  allow_failures:
+  - rvm: 1.9.3
+    env: PUPPET_GEM_VERSION="~> 4.0" STRICT_VARIABLES="yes" HIERA_GEM_VERSION="3.0.6'
+  - rvm: 2.1.0
+    env: PUPPET_GEM_VERSION="~> 4.0" STRICT_VARIABLES="yes" HIERA_GEM_VERSION="3.0.6' 
+  - rvm: 2.3.0
+    env: PUPPET_GEM_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK="test" HIERA_GEM_VERSION="3.0.6' 

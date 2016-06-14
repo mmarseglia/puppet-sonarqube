@@ -1,8 +1,11 @@
 fixtures:
   repositories:
-    archive: "https://github.com/puppet-community/puppet-archive.git"
-    java: "https://github.com/mmarseglia/puppetlabs-java.git"
+    archive: "https://github.com/voxpupuli/puppet-archive.git"
+    java: "https://github.com/puppetlabs/puppetlabs-java.git"
     stdlib: "git://github.com/puppetlabs/puppetlabs-stdlib.git"
-    mysql: "https://github.com/puppetlabs/puppetlabs-mysql.git"
+    systemd: "https://github.com/camptocamp/puppet-systemd"
+    apt: "https://github.com/puppetlabs/puppetlabs-apt"
+    zypprepo: "https://github.com/deadpoint/puppet-zypprepo"
+    maven: "https://github.com/maestrodev/puppet-maven.git"
   symlinks:
     sonarqube: "#{source_dir}"

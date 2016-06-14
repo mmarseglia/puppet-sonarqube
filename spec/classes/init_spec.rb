@@ -2,71 +2,266 @@ require 'spec_helper'
 
 describe 'sonarqube' do
 
-  let(:sonar_properties) { '/usr/local/sonar/conf/sonar.properties' }
-
-  context "when installing version 4", :compile do
-    let(:params) {{ :version => '4.5.7' }}
-    it { should contain_archive('/tmp/sonarqube-4.5.7.zip').with_source('https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-4.5.7.zip') }
-  end
-
-  context "when crowd configuration is supplied", :compile do
-    let(:params) { { :crowd => {
-      'application' => 'crowdapplication',
-      'service_url' => 'crowdserviceurl',
-      'password'    => 'crowdpassword',
-    } } }
-
-    it 'should generate sonar.properties config for crowd' do
-      should contain_file(sonar_properties).with_content(%r[sonar\.authenticator\.class: org\.sonar\.plugins\.crowd\.CrowdAuthenticator])
-      should contain_file(sonar_properties).with_content(%r[crowd\.url: crowdserviceurl])
-      should contain_file(sonar_properties).with_content(%r[crowd\.application: crowdapplication])
-      should contain_file(sonar_properties).with_content(%r[crowd\.password: crowdpassword])
+  context 'with default parameters' do
+    let(:facts) do
+      { :systemd      => false,
+        :osfamily     => 'redhat',
+        :kernel       => 'linux',
+        :architexture => 'x86_64',
+      }
     end
-  end
+    it { is_expected.to contain_class('sonarqube') }
+    it do 
+      is_expected.to contain_user('sonar').with(
+        :ensure => 'present',
+        :home   => '/var/local/sonar',
+        :managehome => 'false',
+        :system     => 'true',
+      )
+    end
+    it do 
+      is_expected.to contain_group('sonar').with(
+        :ensure => 'present',
+        :system => 'true',
+      )
+    end
+    it do 
+      is_expected.to contain_file('/var/local/sonar').with(
+        :ensure => 'directory',
+        :mode   => '0700',
+        :owner  => 'sonar',
+        :group  => 'sonar',
+      )
+    end
+    it { is_expected.to contain_package('unzip').with_ensure('present') }
+    ['data', 'extras', 'extensions', 'logs'].each  do |dir|
+      it { is_expected.to contain_sonarqube__move_to_home("#{dir}").with_home('/var/local/sonar') }
+    end
+    it do
+      is_expected.to contain_archive('/tmp/sonarqube-4.5.7.zip').with(
+        :ensure       => 'present',
+        :extract      => 'true',
+        :extract_path => '/usr/local',
+        :source       => 'https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-4.5.7.zip',
+        :user         => 'sonar',
+        :group        => 'sonar',
+        :creates      => '/usr/local/sonarqube-4.5.7/COPYING',
+        :notify       => 'Service[sonarqube]',
+      )
+    end
+    it do 
+      is_expected.to contain_archive('/tmp/sonarqube-4.5.7.zip').that_requires(
+        [ 'File[/usr/local/sonarqube-4.5.7]', 
+          'Package[unzip]', 
+          'Sonarqube::Move_to_home[data]',
+          'Sonarqube::Move_to_home[extras]',
+          'Sonarqube::Move_to_home[extensions]',
+          'Sonarqube::Move_to_home[logs]',
+        ]
+      )
+    end
+    it do 
+      is_expected.to contain_file('/usr/local/sonarqube-4.5.7').with(
+        :ensure => 'directory',
+        :owner  => 'sonar',
+        :group  => 'sonar',
+      )
+    end
+    it do
+      is_expected.to contain_file('/usr/local/sonar').with(
+        :ensure => 'link',
+        :target => '/usr/local/sonarqube-4.5.7',
+        :owner  => 'sonar',
+        :group  => 'sonar',
+        :notify => 'Service[sonarqube]',
+        :require => 'File[/usr/local/sonarqube-4.5.7]',
+      )
+    end
+    it do
+      is_expected.to contain_file('/var/local/sonar/extensions/plugins').with(
+        :ensure => 'directory',
+        :owner  => 'sonar',
+        :group  => 'sonar',
+      )
+    end
+    it { is_expected.to contain_file('/var/local/sonar/extensions/plugins').that_requires('Sonarqube::Move_to_home[extensions]') }
+    it do
+      is_expected.to contain_file('/usr/local/sonar/conf/sonar.properties').with(
+        :ensure => 'file',
+        :mode => '0600',
+        :content => /jdbc:h2:tcp:\/\/localhost:9092\/sonar/,
+      )
+    end
+    it { is_expected.to contain_file('/usr/local/sonar/conf/sonar.properties').that_requires('Archive[/tmp/sonarqube-4.5.7.zip]') }
+    it { is_expected.to contain_file('/usr/local/sonar/conf/sonar.properties').with_content(/sonar.updatecenter.activate=true/) }
+    it do
+      is_expected.to contain_file('/usr/local/sonar/bin/linux-x86-64/sonar.sh').with(
+        :ensure => 'file',
+        :owner  => 'sonar',
+        :group  => 'sonar',
+      )
+    end
+    it { is_expected.to contain_file('/usr/local/sonar/bin/linux-x86-64/sonar.sh').that_requires('Archive[/tmp/sonarqube-4.5.7.zip]') }
+    it do
+      is_expected.to contain_file('/etc/init.d/sonar').with(
+        :ensure  => 'link',
+        :target  => '/usr/local/sonar/bin/linux-x86-64/sonar.sh',
+      )
+    end
+    it { is_expected.to contain_file('/etc/init.d/sonar').that_requires('Archive[/tmp/sonarqube-4.5.7.zip]') }
+    it { is_expected.not_to contain_file('/usr/lib/systemd/system/sonar.service') }
+    it { is_expected.not_to contain_class('systemd') }
+    it do
+      is_expected.to contain_service('sonarqube').with(
+        :ensure     => 'running',
+        :name       => 'sonar',
+        :hasrestart => 'true',
+        :hasstatus  => 'true',
+        :enable     => 'true',
+      )
+    end
+    it do
+      is_expected.to contain_service('sonarqube').that_requires(
+        [ 'Archive[/tmp/sonarqube-4.5.7.zip]',
+          'File[/etc/init.d/sonar]',
+        ]
+      )
+    end
+  end # context default parameters
+  context 'on a systemd enabled system' do
+    let(:facts) do
+      { :systemd      => true,
+        :path         => '/usr/sbin',
+        :osfamily     => 'redhat',
+        :kernel       => 'linux',
+        :architexture => 'x86_64',
+      }
+    end
+    it do
+      is_expected.to contain_systemd__unit_file('sonar.service').with(
+        :path   => '/usr/lib/systemd/system/',
+        :before => 'Service[sonarqube]',
+      )
+    end
+  end # context systemd
+  context 'when installing from package' do
+    let(:facts) do
+      { :systemd      => false,
+        :osfamily     => 'redhat',
+        :kernel       => 'linux',
+        :architexture => 'x86_64',
+      }
+    end
+    context 'without repo management' do
+      let(:params) do
+        { :use_package  => true,
+          :version      => '5.4-1',
+          :package_name => 'sonar',
+        }
+      end
+      it { is_expected.to contain_package('sonar').with_ensure('5.4-1') }
+      # we do not check all properties here, only the one that are mutable
+      it { is_expected.to contain_user('sonar').with_home('/var/local/sonar') }
+      it { is_expected.to contain_group('sonar') }
+      it { is_expected.to contain_file('/var/local/sonar') }
+      it { is_expected.to contain_file('/opt/sonar/conf/sonar.properties').that_requires('Package[sonar]') }
+      it { is_expected.to contain_file('/opt/sonar/bin/linux-x86-64/sonar.sh').that_requires('Package[sonar]') }
+      it { is_expected.to contain_file('/etc/init.d/sonar').that_requires('Package[sonar]') }
+      it { is_expected.to contain_service('sonarqube').that_requires(['Package[sonar]', 'File[/etc/init.d/sonar]']) }
+      # resources not allowed here
+      it { is_expected.not_to contain_sonarqube__move_to_home() }
+      it { is_expected.not_to contain_package('unzip') }
+      it { is_expected.not_to contain_archive() }
+      it { is_expected.not_to contain_file('/usr/local/sonar-5.4-1') }
+      it { is_expected.not_to contain_file('/usr/local/sonar') }
+      it { is_expected.not_to contain_file('/var/local/sonar/extension/plugins') }
+    end # context without repo
+    context 'with repo management' do
+      let(:params) do
+        { :use_package  => true,
+          :version      => '5.4-1',
+          :package_name => 'sonar',
+          :manage_repo  => true,
+        }
+      end
+      # only test the repo stuff
+      it do
+        is_expected.to contain_class('sonarqube::repo').with(
+          :repo_url => /http:\/\/downloads.sourceforge.net\/project\/sonar-pkg/,
+          :before   => 'Package[sonar]',
+        )
+      end
+    end #context with repo
+  end # context default parameters
 
-  context "when no crowd configuration is supplied", :compile do
-    it { should contain_file(sonar_properties).without_content("crowd") }
-  end
-
-  context "when ldap local users configuration is supplied", :compile do
-    let(:params) { { :ldap => {
-      'url'          => 'ldap://myserver.mycompany.com',
-      'user_base_dn' => 'ou=Users,dc=mycompany,dc=com',
-      'local_users'  => 'foo',
-    } } }
-
-    it { should contain_file(sonar_properties).with_content(/sonar.security.localUsers=foo/) }
-    it { should contain_file(sonar_properties).with_content(/sonar.security.realm=LDAP/) }
-    it { should contain_file(sonar_properties).with_content(/ldap.url=ldap:\/\/myserver.mycompany.com/) }
-    it { should contain_file(sonar_properties).with_content(/ldap.user.baseDn: ou=Users,dc=mycompany,dc=com/) }
-  end
-
-  context "when ldap local users configuration is supplied as array", :compile do
-    let(:params) { { :ldap => {
-      'url'          => 'ldap://myserver.mycompany.com',
-      'user_base_dn' => 'ou=Users,dc=mycompany,dc=com',
-      'local_users' => ['foo','bar'],
-    } } }
-
-    it { should contain_file(sonar_properties).with_content(/sonar.security.localUsers=foo,bar/) }
-    it { should contain_file(sonar_properties).with_content(/sonar.security.realm=LDAP/) }
-    it { should contain_file(sonar_properties).with_content(/ldap.url=ldap:\/\/myserver.mycompany.com/) }
-    it { should contain_file(sonar_properties).with_content(/ldap.user.baseDn: ou=Users,dc=mycompany,dc=com/) }
-  end
-
-  context "when no ldap local users configuration is supplied", :compile do
-    let(:params) { { :ldap => {
-      'url'          => 'ldap://myserver.mycompany.com',
-      'user_base_dn' => 'ou=Users,dc=mycompany,dc=com',
-    } } }
-    it { should contain_file(sonar_properties).without_content(/sonar.security.localUsers/) }
-    it { should contain_file(sonar_properties).with_content(/sonar.security.realm=LDAP/) }
-    it { should contain_file(sonar_properties).with_content(/ldap.url=ldap:\/\/myserver.mycompany.com/) }
-    it { should contain_file(sonar_properties).with_content(/ldap.user.baseDn: ou=Users,dc=mycompany,dc=com/) }
-  end
-
-  context "when no ldap configuration is supplied", :compile do
-    it { should contain_file(sonar_properties).without_content(/sonar.security/) }
-    it { should contain_file(sonar_properties).without_content(/ldap./) }
-  end
+  context 'specific parameter settings' do
+    let(:facts) do
+      { :systemd      => false,
+        :osfamily     => 'redhat',
+        :kernel       => 'linux',
+        :architexture => 'x86_64',
+      }
+    end
+    let(:sonar_properties) { '/usr/local/sonar/conf/sonar.properties' }
+    context "when crowd configuration is supplied" do
+      let(:params) do 
+        { :crowd => {
+          'application' => 'crowdapplication',
+          'service_url' => 'crowdserviceurl',
+          'password'    => 'crowdpassword',
+        } }
+      end
+      it 'should generate sonar.properties config for crowd' do
+        is_expected.to contain_file(sonar_properties).with_content(%r[sonar\.authenticator\.class: org\.sonar\.plugins\.crowd\.CrowdAuthenticator])
+        is_expected.to contain_file(sonar_properties).with_content(%r[crowd\.url: crowdserviceurl])
+        is_expected.to contain_file(sonar_properties).with_content(%r[crowd\.application: crowdapplication])
+        is_expected.to contain_file(sonar_properties).with_content(%r[crowd\.password: crowdpassword])
+      end
+    end # context crowd
+    context "when no crowd configuration is supplied" do
+      it { is_expected.to contain_file(sonar_properties).without_content("crowd") }
+    end # context no crowd
+    context "when ldap local users configuration is supplied" do
+      let(:params) do 
+        { :ldap => {
+          'url'          => 'ldap://myserver.mycompany.com',
+          'user_base_dn' => 'ou=Users,dc=mycompany,dc=com',
+          'local_users'  => 'foo',
+        } }
+      end
+      it { is_expected.to contain_file(sonar_properties).with_content(/sonar.security.localUsers=foo/) }
+      it { is_expected.to contain_file(sonar_properties).with_content(/sonar.security.realm=LDAP/) }
+      it { is_expected.to contain_file(sonar_properties).with_content(/ldap.url=ldap:\/\/myserver.mycompany.com/) }
+      it { is_expected.to contain_file(sonar_properties).with_content(/ldap.user.baseDn: ou=Users,dc=mycompany,dc=com/) }
+    end
+    context "when ldap local users configuration is supplied as array" do
+      let(:params) do
+        { :ldap => {
+          'url'          => 'ldap://myserver.mycompany.com',
+          'user_base_dn' => 'ou=Users,dc=mycompany,dc=com',
+          'local_users' => ['foo','bar'],
+        } }
+      end
+      it { is_expected.to contain_file(sonar_properties).with_content(/sonar.security.localUsers=foo,bar/) }
+      it { is_expected.to contain_file(sonar_properties).with_content(/sonar.security.realm=LDAP/) }
+      it { is_expected.to contain_file(sonar_properties).with_content(/ldap.url=ldap:\/\/myserver.mycompany.com/) }
+      it { is_expected.to contain_file(sonar_properties).with_content(/ldap.user.baseDn: ou=Users,dc=mycompany,dc=com/) }
+    end
+    context "when no ldap local users configuration is supplied", :compile do
+      let(:params) do 
+        { :ldap => {
+          'url'          => 'ldap://myserver.mycompany.com',
+          'user_base_dn' => 'ou=Users,dc=mycompany,dc=com',
+        } }
+      end
+      it { is_expected.to contain_file(sonar_properties).without_content(/sonar.security.localUsers/) }
+      it { is_expected.to contain_file(sonar_properties).with_content(/sonar.security.realm=LDAP/) }
+      it { is_expected.to contain_file(sonar_properties).with_content(/ldap.url=ldap:\/\/myserver.mycompany.com/) }
+      it { is_expected.to contain_file(sonar_properties).with_content(/ldap.user.baseDn: ou=Users,dc=mycompany,dc=com/) }
+    end
+    context "when no ldap configuration is supplied", :compile do
+      it { is_expected.to contain_file(sonar_properties).without_content(/sonar.security/) }
+      it { is_expected.to contain_file(sonar_properties).without_content(/ldap./) }
+    end
+  end # parameter testing
 end

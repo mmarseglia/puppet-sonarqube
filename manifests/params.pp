@@ -21,7 +21,23 @@ class sonarqube::params {
       default  => 'universal-32',
     }
   }
-  
+
   $arch = "${arch1}-${arch2}"
 
+  # see https://tickets.puppetlabs.com/browse/PUP-1080
+
+  $service   = 'sonar'
+  $home_base = '/var/local'
+
+  case $::osfamily {
+    'RedHat','Suse': {
+      $repo_url = 'http://downloads.sourceforge.net/project/sonar-pkg/rpm'
+    }
+    'Debian': {
+      $repo_url = 'http://downloads.sourceforge.net/project/sonar-pkg/deb'
+    }
+    default: {
+      $repo_url = undef
+    }
+  }
 }
