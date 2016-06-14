@@ -13,7 +13,7 @@ describe 'sonarqube::scanner::config' do
   context 'when using package' do
     let(:params) do
       {  :use_package => true,
-         :installroot  => '/opt/sonar-scanner-2.6',
+         :installroot => '/opt/sonar-scanner-2.6',
       }
     end
     it do

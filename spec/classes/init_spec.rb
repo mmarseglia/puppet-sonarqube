@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe 'sonarqube' do
-
   context 'with default parameters' do
     let(:facts) do
       { :systemd      => false,
@@ -34,7 +33,7 @@ describe 'sonarqube' do
       )
     end
     it { is_expected.to contain_package('unzip').with_ensure('present') }
-    ['data', 'extras', 'extensions', 'logs'].each  do |dir|
+    ['data', 'extras', 'extensions', 'logs'].each do |dir|
       it { is_expected.to contain_sonarqube__move_to_home("#{dir}").with_home('/var/local/sonar') }
     end
     it do
