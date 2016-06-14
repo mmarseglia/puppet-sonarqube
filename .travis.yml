@@ -1,7 +1,7 @@
 ---
 language: ruby
 sudo: false
-cache: bundler
+# cache: bundler
 notifications:
   email: false
 bundler_args: --without system_tests
@@ -25,5 +25,9 @@ matrix:
   - rvm: 2.3.0
     env: PUPPET_GEM_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK="test" HIERA_GEM_VERSION="~> 3.0.0'
   allow_failures:
+  - rvm: 1.9.3
+    env: PUPPET_GEM_VERSION="~> 4.0" STRICT_VARIABLES="yes" HIERA_GEM_VERSION="= 3.0.6'
+  - rvm: 2.1.0
+    env: PUPPET_GEM_VERSION="~> 4.0" STRICT_VARIABLES="yes" HIERA_GEM_VERSION="= 3.0.6' 
   - rvm: 2.3.0
     env: PUPPET_GEM_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK="test"
