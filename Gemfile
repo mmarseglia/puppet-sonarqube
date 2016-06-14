@@ -3,7 +3,6 @@ source ENV['GEM_SOURCE'] || "https://rubygems.org"
 group :test do
   gem "rake"
   gem "puppet", ENV['PUPPET_GEM_VERSION'] || '~> 3.8.0'
-  gem "hiera", ENV['HIERA_GEM_VERSION'] || '~> 1'
   gem "rspec", '< 3.2.0'
   gem "rspec-puppet", :git => 'https://github.com/rodjek/rspec-puppet.git'
   gem "puppetlabs_spec_helper"
@@ -26,7 +25,6 @@ group :development do
   gem "travis"
   gem "travis-lint"
   gem "puppet-blacksmith"
-  gem "listen", "<= 3.0.6"
   gem "guard-rake"
 end
 
