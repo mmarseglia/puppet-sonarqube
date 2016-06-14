@@ -1,15 +1,15 @@
 include ::java
 class { '::mysql::server' : }
 mysql::db { 'sonar' :
-  user      => 'sonar',
-  password  => 'sonar',
-  host      => 'localhost',
-  grant     => ['ALL'],
+  user     => 'sonar',
+  password => 'sonar',
+  host     => 'localhost',
+  grant    => ['ALL'],
 }
 
 class { '::sonarqube' :
-  jdbc  => {
-    url => 'jdbc:mysql://localhost/sonar?useUnicode=true&characterEncoding=utf8',
+  jdbc    => {
+    url                               => 'jdbc:mysql://localhost/sonar?useUnicode=true&characterEncoding=utf8',
     username                          => 'sonar',
     password                          => 'sonar',
     max_active                        => '50',
