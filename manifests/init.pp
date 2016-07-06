@@ -99,6 +99,10 @@
 #   Used in the sonar.properties template.
 #   Default: {}
 #
+# [*https_proxy*]
+#   Used in the sonar.properties template.
+#   Default: {}
+#
 # [*web_java_opts*]
 #   Used in the sonar.properties template.
 #   Default: undef
@@ -199,6 +203,7 @@ class sonarqube (
   $log_folder       = "${sonarqube::params::home_base}/${sonarqube::params::service}/logs",
   $updatecenter     = true,
   $http_proxy       = {},
+  $https_proxy      = {},
   $profile          = false,
   $web_java_opts    = undef,
   $search_java_opts = undef,
@@ -212,6 +217,38 @@ class sonarqube (
 ) inherits sonarqube::params {
 
   validate_absolute_path($download_dir)
+  validate_hash($http_proxy)
+  validate_hash($https_proxy)
+
+  # proxy setting validation
+  # must define host and port 
+  if !empty($http_proxy) {
+    if has_key($http_proxy, 'port') and has_key($http_proxy, 'host') {
+      if $http_proxy['port'] == '' or $http_proxy['host'] == '' {
+        fail('When defining http_proxy hash, both host and port are mandatory')
+      }
+    } else {
+      fail('When defining http_proxy hash, both host and port are mandatory')
+    }
+  }
+
+  if !empty($https_proxy) {
+    if has_key($https_proxy, 'port') and has_key($https_proxy, 'host') {
+      if $https_proxy['port'] == '' or $https_proxy['host'] == '' {
+        fail('When defining http_proxy hash, both host and port are mandatory')
+      }
+    } else {
+      fail('When defining http_proxy hash, both host and port are mandatory')
+    }
+  }
+
+  # http_proxy and https_proxy port cannot be the same
+  if has_key($http_proxy, 'port') and has_key($https_proxy, 'port') {
+    if $http_proxy['port'] == $https_proxy['port'] {
+      fail('When both defining http_proxy and https_proxy hashes, you cannot use the same port number !')
+    }
+  }
+  # end proxy vaildation
 
   Exec {
     path => '/usr/bin:/usr/sbin:/bin:/sbin:/usr/local/bin',
