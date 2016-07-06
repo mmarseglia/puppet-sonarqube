@@ -217,6 +217,35 @@ describe 'sonarqube' do
         is_expected.to contain_file(sonar_properties).with_content(%r[crowd\.password: crowdpassword])
       end
     end # context crowd
+      context "when http configuration is supplies as array" do
+        let(:params) do
+          { "http_proxy" => {
+              'host'        => 'proxy.example.com',
+              'port'        => '8080',
+              'ntlm_domain' => '',
+              'user'        => 'proxy_user',
+              'password'    => 'proxy_secret',
+            },
+            "https_proxy" => {
+              'host'        => 'proxy.example.com',
+              'port'        => '8080',
+              'ntlm_domain' => '',
+              'user'        => 'proxy_user',
+              'password'    => 'proxy_secret',
+            } 
+          }
+        end
+        it { is_expected.to contain_file(sonar_properties).with_content(/http.proxyHost=proxy.example.com/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/http.proxyPort=8080/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/http.auth.ntlm.domain=/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/http.proxyUser=proxy_user/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/http.proxyPassword=proxy_secret/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/https.proxyHost=proxy.example.com/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/https.proxyPort=8080/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/https.auth.ntlm.domain=/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/https.proxyUser=proxy_user/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/https.proxyPassword=proxy_secret/) }
+      end
     context "when no crowd configuration is supplied" do
       it { is_expected.to contain_file(sonar_properties).without_content("crowd") }
     end # context no crowd

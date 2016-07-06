@@ -99,6 +99,10 @@
 #   Used in the sonar.properties template.
 #   Default: {}
 #
+# [*https_proxy*]
+#   Used in the sonar.properties template.
+#   Default: {}
+#
 # [*web_java_opts*]
 #   Used in the sonar.properties template.
 #   Default: undef
@@ -199,6 +203,7 @@ class sonarqube (
   $log_folder       = "${sonarqube::params::home_base}/${sonarqube::params::service}/logs",
   $updatecenter     = true,
   $http_proxy       = {},
+  $https_proxy      = {},
   $profile          = false,
   $web_java_opts    = undef,
   $search_java_opts = undef,
