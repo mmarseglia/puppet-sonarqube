@@ -42,6 +42,10 @@ or
       }
     }
 
+When defining https\_proxy and/or https\_proxy settings, following rules are forced :
+* http\_proxy.port and https\_proxy.port cannot be the same
+* both host and port must be set and cannot be an empty string
+
 ## SonarQube Plugins
 
 The `sonarqube::plugin` defined type can also be used to install SonarQube plugins. Note that Maven is required to download the plugins then.

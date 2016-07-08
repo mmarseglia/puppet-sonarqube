@@ -217,6 +217,61 @@ describe 'sonarqube' do
         is_expected.to contain_file(sonar_properties).with_content(%r[crowd\.password: crowdpassword])
       end
     end # context crowd
+    ['http','https'].each do |proto|
+      context "when #{proto}_proxy configuration is defines" do
+        let(:params) do
+          { "#{proto}_proxy" => {
+              'host'        => 'proxy.example.com',
+              'port'        => '8080',
+              'ntlm_domain' => '',
+              'user'        => 'proxy_user',
+              'password'    => 'proxy_secret',
+            }
+          }
+        end
+        it { is_expected.to contain_file(sonar_properties).with_content(/#{proto}.proxyHost=proxy.example.com/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/#{proto}.proxyPort=8080/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/#{proto}.auth.ntlm.domain=/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/#{proto}.proxyUser=proxy_user/) }
+        it { is_expected.to contain_file(sonar_properties).with_content(/#{proto}.proxyPassword=proxy_secret/) }
+      end
+    end # array
+    context "when both https_proxy and http_proxy use the same port" do
+      let(:params) do
+        { "http_proxy" => {
+            'host' => 'proxy.example.com',
+            'port' => '8080',
+          },
+          "https_proxy" => {
+            'host' => 'proxy.example.com',
+            'port' => '8080',
+          }
+        }
+      end
+      it { is_expected.to compile.and_raise_error(/cannot use the same port number/) }
+    end
+    # http(s)_proxy undefined key and key with empty string
+    ['http','https'].each do |proto|
+      context "when #{proto}_proxy hash is defined, host cannot be empty" do
+        let(:params) do
+          { "#{proto}_proxy" => {
+              'host' => '',
+              'port' => '8080',
+            }
+          }
+        end
+        it { is_expected.to compile.and_raise_error(/host and port are mandatory/) }
+      end
+      context "when #{proto}_proxy hash is defined, port must be defined" do
+        let(:params) do
+          { "#{proto}_proxy" => {
+              'host' => 'proxy.example.com'
+            }
+          }
+        end
+        it { is_expected.to compile.and_raise_error(/host and port are mandatory/) }
+      end
+    end # http(s)_proxy undefined values
     context "when no crowd configuration is supplied" do
       it { is_expected.to contain_file(sonar_properties).without_content("crowd") }
     end # context no crowd

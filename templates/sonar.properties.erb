@@ -225,6 +225,19 @@ http.proxyUser=<%= @http_proxy['user'] %>
 http.proxyPassword=<%= @http_proxy['password'] %>
 <% end -%>
 
+<% if !@https_proxy.empty? -%>
+# HTTPS proxy (default none)
+https.proxyHost=<%= @https_proxy['host'] %>
+https.proxyPort=<%= @https_proxy['port'] %>
+
+# NT domain name if NTLM proxy is used
+https.auth.ntlm.domain=<%= @https_proxy['ntlm_domain'] %>
+
+# proxy authentication. The 2 following properties are used for HTTPS.
+https.proxyUser=<%= @https_proxy['user'] %>
+https.proxyPassword=<%= @https_proxy['password'] %>
+<% end -%>
+
 # SOCKS proxy (default none)
 #socksProxyHost=
 #socksProxyPort=
