@@ -37,20 +37,20 @@ describe 'sonarqube' do
       it { is_expected.to contain_sonarqube__move_to_home("#{dir}").with_home('/var/local/sonar') }
     end
     it do
-      is_expected.to contain_archive('/tmp/sonarqube-4.5.7.zip').with(
+      is_expected.to contain_archive('/tmp/sonarqube-5.6.3.zip').with(
         :ensure       => 'present',
         :extract      => 'true',
         :extract_path => '/usr/local',
-        :source       => 'https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-4.5.7.zip',
+        :source       => 'https://sonarsource.bintray.com/Distribution/sonarqube/sonarqube-5.6.3.zip',
         :user         => 'sonar',
         :group        => 'sonar',
-        :creates      => '/usr/local/sonarqube-4.5.7/COPYING',
+        :creates      => '/usr/local/sonarqube-5.6.3/COPYING',
         :notify       => 'Service[sonarqube]',
       )
     end
     it do 
-      is_expected.to contain_archive('/tmp/sonarqube-4.5.7.zip').that_requires(
-        [ 'File[/usr/local/sonarqube-4.5.7]', 
+      is_expected.to contain_archive('/tmp/sonarqube-5.6.3.zip').that_requires(
+        [ 'File[/usr/local/sonarqube-5.6.3]', 
           'Package[unzip]', 
           'Sonarqube::Move_to_home[data]',
           'Sonarqube::Move_to_home[extras]',
@@ -60,7 +60,7 @@ describe 'sonarqube' do
       )
     end
     it do 
-      is_expected.to contain_file('/usr/local/sonarqube-4.5.7').with(
+      is_expected.to contain_file('/usr/local/sonarqube-5.6.3').with(
         :ensure => 'directory',
         :owner  => 'sonar',
         :group  => 'sonar',
@@ -69,11 +69,11 @@ describe 'sonarqube' do
     it do
       is_expected.to contain_file('/usr/local/sonar').with(
         :ensure => 'link',
-        :target => '/usr/local/sonarqube-4.5.7',
+        :target => '/usr/local/sonarqube-5.6.3',
         :owner  => 'sonar',
         :group  => 'sonar',
         :notify => 'Service[sonarqube]',
-        :require => 'File[/usr/local/sonarqube-4.5.7]',
+        :require => 'File[/usr/local/sonarqube-5.6.3]',
       )
     end
     it do
@@ -91,7 +91,7 @@ describe 'sonarqube' do
         :content => /jdbc:h2:tcp:\/\/localhost:9092\/sonar/,
       )
     end
-    it { is_expected.to contain_file('/usr/local/sonar/conf/sonar.properties').that_requires('Archive[/tmp/sonarqube-4.5.7.zip]') }
+    it { is_expected.to contain_file('/usr/local/sonar/conf/sonar.properties').that_requires('Archive[/tmp/sonarqube-5.6.3.zip]') }
     it { is_expected.to contain_file('/usr/local/sonar/conf/sonar.properties').with_content(/sonar.updatecenter.activate=true/) }
     it do
       is_expected.to contain_file('/usr/local/sonar/bin/linux-x86-64/sonar.sh').with(
@@ -100,14 +100,14 @@ describe 'sonarqube' do
         :group  => 'sonar',
       )
     end
-    it { is_expected.to contain_file('/usr/local/sonar/bin/linux-x86-64/sonar.sh').that_requires('Archive[/tmp/sonarqube-4.5.7.zip]') }
+    it { is_expected.to contain_file('/usr/local/sonar/bin/linux-x86-64/sonar.sh').that_requires('Archive[/tmp/sonarqube-5.6.3.zip]') }
     it do
       is_expected.to contain_file('/etc/init.d/sonar').with(
         :ensure  => 'link',
         :target  => '/usr/local/sonar/bin/linux-x86-64/sonar.sh',
       )
     end
-    it { is_expected.to contain_file('/etc/init.d/sonar').that_requires('Archive[/tmp/sonarqube-4.5.7.zip]') }
+    it { is_expected.to contain_file('/etc/init.d/sonar').that_requires('Archive[/tmp/sonarqube-5.6.3.zip]') }
     it { is_expected.not_to contain_file('/usr/lib/systemd/system/sonar.service') }
     it { is_expected.not_to contain_class('systemd') }
     it do
@@ -121,7 +121,7 @@ describe 'sonarqube' do
     end
     it do
       is_expected.to contain_service('sonarqube').that_requires(
-        [ 'Archive[/tmp/sonarqube-4.5.7.zip]',
+        [ 'Archive[/tmp/sonarqube-5.6.3.zip]',
           'File[/etc/init.d/sonar]',
         ]
       )

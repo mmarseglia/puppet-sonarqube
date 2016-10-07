@@ -169,7 +169,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 class sonarqube (
-  $version          = '4.5.7',
+  $version          = '5.6.3',
   $user             = 'sonar',
   $group            = 'sonar',
   $user_system      = true,
