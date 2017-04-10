@@ -109,12 +109,6 @@ class sonarqube::scanner (
     $jdbc             = {},
 ) {
 
-  validate_string($package_name)
-  validate_absolute_path($installroot)
-  validate_bool($use_package)
-  validate_bool($manage_profile)
-  validate_bool($manage_link)
-
   anchor { 'sonarqube::scanner::begin': } ->
   class { '::sonarqube::scanner::install':
     package_name   => $package_name,
