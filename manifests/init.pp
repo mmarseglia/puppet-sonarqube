@@ -256,11 +256,9 @@ class sonarqube (
   }
 
   if $use_package {
-    validate_absolute_path($packageroot)
     $installdir = "${packageroot}/${service}"
     $extensions_dir = "${installdir}/extensions"
   } else {
-    validate_absolute_path($installroot)
     $installdir = "${installroot}/${service}"
     $extensions_dir = "${home}/extensions"
   }
