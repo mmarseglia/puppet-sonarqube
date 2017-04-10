@@ -4,7 +4,7 @@ describe 'sonarqube' do
   context 'with default parameters' do
     let(:facts) do
       { :systemd      => false,
-        :osfamily     => 'redhat',
+        :osfamily     => 'RedHat',
         :kernel       => 'linux',
         :architexture => 'x86_64',
       }
@@ -15,13 +15,11 @@ describe 'sonarqube' do
         :ensure => 'present',
         :home   => '/var/local/sonar',
         :managehome => 'false',
-        :system     => 'true',
       )
     end
     it do 
       is_expected.to contain_group('sonar').with(
         :ensure => 'present',
-        :system => 'true',
       )
     end
     it do 

@@ -17,6 +17,9 @@ RSpec.configure do |c|
     :operatingsystemrelease => '6.6',
     :kernel => 'Linux',
     :osfamily => 'RedHat',
+    :os => {
+	  :family => 'RedHat',
+  },
     :architecture => 'x86_64',
     :clientcert => 'puppet.acme.com',
     :puppetversion => ENV['PUPPET_GEM_VERSION'] || '4.6.1'

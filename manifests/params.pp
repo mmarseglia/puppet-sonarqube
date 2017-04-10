@@ -24,10 +24,12 @@ class sonarqube::params {
 
   $arch = "${arch1}-${arch2}"
 
-  # see https://tickets.puppetlabs.com/browse/PUP-1080
+  $user = 'sonar'
+  $group = 'sonar'
 
   $service   = 'sonar'
   $home_base = '/var/local'
+  $home = "${home_base}/${service}"
 
   case $::osfamily {
     'RedHat','Suse': {

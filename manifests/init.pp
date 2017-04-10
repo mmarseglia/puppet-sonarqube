@@ -170,13 +170,13 @@
 # limitations under the License.
 class sonarqube (
   $version          = '5.6.3',
-  $user             = 'sonar',
-  $group            = 'sonar',
+  $user             = $sonarqube::params::user,
+  $group            = $sonarqube::params::group,
   $user_system      = true,
   $service          = $sonarqube::params::service,
   $installroot      = '/usr/local',
   $packageroot      = '/opt',
-  $home             = "${sonarqube::params::home_base}/${sonarqube::params::service}",
+  $home             = $sonarqube::params::home,
   $host             = undef,
   $port             = 9000,
   $portAjp          = -1,
@@ -255,32 +255,15 @@ class sonarqube (
     group => $group,
   }
 
-  if $use_package {
-    $installdir = "${packageroot}/${service}"
-    $extensions_dir = "${installdir}/extensions"
-  } else {
-    $installdir = "${installroot}/${service}"
-    $extensions_dir = "${home}/extensions"
-  }
-  $plugin_dir = "${extensions_dir}/plugins"
-
-
-  $tmpzip = "${download_dir}/${package_name}-${version}.zip"
-
-  # /usr/local/sonar/bin/linux-x86-64/
-  $script = "${installdir}/bin/${arch}/sonar.sh"
-
-  # create user, group to run sonarqube
+# create user, group to run sonarqube
   user { $user:
     ensure     => present,
     home       => $home,
     managehome => false,
-    system     => $user_system,
   }
 
   group { $group:
     ensure => present,
-    system => $user_system,
   }
 
   # ensure data directory exists
@@ -290,7 +273,24 @@ class sonarqube (
     ensure => directory,
     mode   => '0700',
   }
+  
+  if $use_package {
+    $installdir = "${packageroot}/${service}"
+    $extensions_dir = "${installdir}/extensions"
+  } else {
+    $installdir = "${installroot}/${service}"
+    $extensions_dir = "${home}/extensions"
+  }
 
+  $plugin_dir = "${extensions_dir}/plugins"
+
+
+  $tmpzip = "${download_dir}/${package_name}-${version}.zip"
+
+  # /usr/local/sonar/bin/linux-x86-64/
+  $script = "${installdir}/bin/${arch}/sonar.sh"
+
+  
   if $use_package {
     # package based installation
     if $manage_repo {
