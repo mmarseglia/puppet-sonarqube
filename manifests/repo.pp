@@ -1,15 +1,17 @@
 # class sonarqube::repo
 #
+# Description
+# Manages the sonarqube repository
+#
+# Parameters
 # [*repo_url*]
 # uri where the repo can be found
 #
-
 class sonarqube::repo (
   $repo_url = $sonarqube::params::repo_url,
-) inherits ::sonarqube::params
-{
+) inherits sonarqube::params {
   case $::osfamily {
-    'redhat': {
+    'RedHat': {
       yumrepo { 'sonarqube':
         ensure   => 'present',
         enabled  => 1,
@@ -22,7 +24,7 @@ class sonarqube::repo (
       # needs the puppetlabs/opt module
       apt::source { 'sonarqube':
         location => $repo_url,
-        repos    => 'Sonarque debian package repo',
+        repos    => 'Sonarqube debian package repo',
         release  => 'binary',
       }
     }

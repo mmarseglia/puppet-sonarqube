@@ -12,8 +12,8 @@ describe 'sonarqube::repo' do
           :gpgcheck => '0',
         )
       end
-      it { is_expected.not_to contain_apt__source() }
-      it { is_expected.not_to contain_zypprepo() }
+      it { is_expected.not_to contain_apt__source('sonarqube') }
+      it { is_expected.not_to contain_zypprepo('sonarqube') }
     end
     context 'on a Debian system' do
       let(:facts) do 
@@ -27,8 +27,8 @@ describe 'sonarqube::repo' do
           :release  => 'binary',
         )
       end
-      it { is_expected.not_to contain_yumrepo() }
-      it { is_expected.not_to contain_zypper() }
+      it { is_expected.not_to contain_yumrepo('sonarqube') }
+      it { is_expected.not_to contain_zypper('sonarqube') }
     end
     context 'on a Suse system' do
       let(:facts) { { :osfamily => 'Suse' } }
@@ -41,8 +41,8 @@ describe 'sonarqube::repo' do
           :type        => 'rpm-md',
         )
       end
-      it { is_expected.not_to contain_yumrepo() }
-      it { is_expected.not_to contain_apt__source() }
+      it { is_expected.not_to contain_yumrepo('sonarqube') }
+      it { is_expected.not_to contain_apt__source('sonarqube') }
     end
     context 'on an unsupported system' do
       let(:facts) { { :osfamily => 'WierdOS' } }
@@ -61,8 +61,8 @@ describe 'sonarqube::repo' do
           :gpgcheck => '0',
         )
       end
-      it { is_expected.not_to contain_apt__source() }
-      it { is_expected.not_to contain_zypprepo() }
+      it { is_expected.not_to contain_apt__source('sonarqube') }
+      it { is_expected.not_to contain_zypprepo('sonarqube') }
     end
     context 'on a Debian system' do
       let(:facts) do
@@ -76,8 +76,8 @@ describe 'sonarqube::repo' do
           :release  => 'binary',
         )
       end
-      it { is_expected.not_to contain_yumrepo() }
-      it { is_expected.not_to contain_zypprepo() }
+      it { is_expected.not_to contain_yumrepo('sonarqube') }
+      it { is_expected.not_to contain_zypprepo('sonarqube') }
     end
     context 'on a Suse system' do
       let(:facts) { { :osfamily => 'Suse', } }
@@ -90,8 +90,8 @@ describe 'sonarqube::repo' do
           :type        => 'rpm-md',
         )
       end
-      it { is_expected.not_to contain_yumrepo() }
-      it { is_expected.not_to contain_apt__source() }
+      it { is_expected.not_to contain_yumrepo('sonarqube') }
+      it { is_expected.not_to contain_apt__source('sonarqube') }
     end
     context 'on an unsupported system' do
       let(:facts) { { :osfamily => 'WierdOS' } }

@@ -18,7 +18,8 @@ RSpec.configure do |c|
     :kernel => 'Linux',
     :osfamily => 'RedHat',
     :architecture => 'x86_64',
-    :clientcert => 'puppet.acme.com'
+    :clientcert => 'puppet.acme.com',
+    :puppetversion => ENV['PUPPET_GEM_VERSION'] || '4.6.1'
   }.merge({"http_proxy"=>nil, "maven_version"=>"3.0.5"})
 
   c.before do

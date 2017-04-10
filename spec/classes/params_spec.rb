@@ -8,7 +8,7 @@ describe 'sonarqube::params' do
          :osfamily     => 'RedHat',
       }
     end
-    it { is_expected.to contain_sonarqube__params }
+    it { is_expected.to contain_class('sonarqube::params')}
     it "Should not contain any resources" do
       should have_resource_count(0)
     end
