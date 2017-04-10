@@ -216,10 +216,6 @@ class sonarqube (
   $repo_url         = $sonarqube::params::repo_url,
 ) inherits sonarqube::params {
 
-  validate_absolute_path($download_dir)
-  validate_hash($http_proxy)
-  validate_hash($https_proxy)
-
   # proxy setting validation
   # must define host and port 
   if !empty($http_proxy) {
