@@ -50,6 +50,7 @@ provision/pe/*
 # IDE generated files #
 #######################
 *.iml
+.idea
 
 # Ruby files #
 ##############

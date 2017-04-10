@@ -169,27 +169,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 class sonarqube (
-  $version          = '5.6.3',
-  $user             = 'sonar',
-  $group            = 'sonar',
-  $user_system      = true,
+  String $version          = '5.6.3',
+  String $user             = 'sonar',
+  String $group            = 'sonar',
+  Bool $user_system      = true,
   $service          = $sonarqube::params::service,
-  $installroot      = '/usr/local',
-  $packageroot      = '/opt',
-  $home             = "${sonarqube::params::home_base}/${sonarqube::params::service}",
+  String $installroot      = '/usr/local',
+  String $packageroot      = '/opt',
+  String $home             = "${sonarqube::params::home_base}/${sonarqube::params::service}",
   $host             = undef,
   $port             = 9000,
   $portAjp          = -1,
-  $download_url     = 'https://sonarsource.bintray.com/Distribution/sonarqube',
-  $download_dir     = '/tmp',
-  $context_path     = '/',
+  String $download_url     = 'https://sonarsource.bintray.com/Distribution/sonarqube',
+  String $download_dir     = '/tmp',
+  String $context_path     = '/',
   $arch             = $sonarqube::params::arch,
-  $https            = {},
-  $ldap             = {},
+  Hash $https            = {},
+  Hash $ldap             = {},
   # ldap and pam are mutually exclusive. Setting $ldap will annihilate the setting of $pam
-  $pam              = {},
-  $crowd            = {},
-  $jdbc             = {
+  Hash $pam              = {},
+  Hash $crowd            = {},
+  Hash $jdbc             = {
     url                               => 'jdbc:h2:tcp://localhost:9092/sonar',
     username                          => 'sonar',
     password                          => 'sonar',
@@ -200,8 +200,8 @@ class sonarqube (
     min_evictable_idle_time_millis    => '600000',
     time_between_eviction_runs_millis => '30000',
   },
-  $log_folder       = "${sonarqube::params::home_base}/${sonarqube::params::service}/logs",
-  $updatecenter     = true,
+  String $log_folder       = "${sonarqube::params::home_base}/${sonarqube::params::service}/logs",
+  Bool $updatecenter     = true,
   $http_proxy       = {},
   $https_proxy      = {},
   $profile          = false,
@@ -216,39 +216,8 @@ class sonarqube (
   $repo_url         = $sonarqube::params::repo_url,
 ) inherits sonarqube::params {
 
-  validate_absolute_path($download_dir)
-  validate_hash($http_proxy)
-  validate_hash($https_proxy)
-
-  # proxy setting validation
-  # must define host and port 
-  if !empty($http_proxy) {
-    if has_key($http_proxy, 'port') and has_key($http_proxy, 'host') {
-      if $http_proxy['port'] == '' or $http_proxy['host'] == '' {
-        fail('When defining http_proxy hash, both host and port are mandatory')
-      }
-    } else {
-      fail('When defining http_proxy hash, both host and port are mandatory')
-    }
-  }
-
-  if !empty($https_proxy) {
-    if has_key($https_proxy, 'port') and has_key($https_proxy, 'host') {
-      if $https_proxy['port'] == '' or $https_proxy['host'] == '' {
-        fail('When defining http_proxy hash, both host and port are mandatory')
-      }
-    } else {
-      fail('When defining http_proxy hash, both host and port are mandatory')
-    }
-  }
-
-  # http_proxy and https_proxy port cannot be the same
-  if has_key($http_proxy, 'port') and has_key($https_proxy, 'port') {
-    if $http_proxy['port'] == $https_proxy['port'] {
-      fail('When both defining http_proxy and https_proxy hashes, you cannot use the same port number !')
-    }
-  }
-  # end proxy vaildation
+  #archive based installation
+  ensure_packages(['unzip'], { 'ensure' => 'present' })
 
   Exec {
     path => '/usr/bin:/usr/sbin:/bin:/sbin:/usr/local/bin',
@@ -259,158 +228,8 @@ class sonarqube (
     group => $group,
   }
 
-  if $use_package {
-    validate_absolute_path($packageroot)
-    $installdir = "${packageroot}/${service}"
-    $extensions_dir = "${installdir}/extensions"
-  } else {
-    validate_absolute_path($installroot)
-    $installdir = "${installroot}/${service}"
-    $extensions_dir = "${home}/extensions"
-  }
-  $plugin_dir = "${extensions_dir}/plugins"
-
-
-  $tmpzip = "${download_dir}/${package_name}-${version}.zip"
-
-  # /usr/local/sonar/bin/linux-x86-64/
-  $script = "${installdir}/bin/${arch}/sonar.sh"
-
-  # create user, group to run sonarqube
-  user { $user:
-    ensure     => present,
-    home       => $home,
-    managehome => false,
-    system     => $user_system,
-  }
-
-  group { $group:
-    ensure => present,
-    system => $user_system,
-  }
-
-  # ensure data directory exists
-  # moved outside the install dir
-  # also needed for the package, since used for PID file
-  file { $home:
-    ensure => directory,
-    mode   => '0700',
-  }
-
-  if $use_package {
-    # package based installation
-    if $manage_repo {
-      class { '::sonarqube::repo':
-        repo_url => $repo_url,
-        before   => Package[$package_name],
-      }
-    } # only redhats for the moment - should go to its own class with the logic
-
-    package { $package_name:
-      ensure => $version,
-    }
-
-  } else {
-
-    #archive based installation
-    ensure_packages(['unzip'], { 'ensure' => 'present' })
-
-    Sonarqube::Move_to_home{
-      home => $home,
-    }
-
-    sonarqube::move_to_home { [ 'data', 'extras', 'extensions', 'logs' ] : }
-
-    # download the sonarqube binary and unpack in the install directory
-    archive { $tmpzip:
-      ensure       => present,
-      extract      => true,
-      extract_path => $installroot,
-      source       => "${download_url}/${package_name}-${version}.zip",
-      user         => $user,
-      group        => $group,
-      creates      => "/usr/local/${package_name}-${version}/COPYING",
-      notify       => Service['sonarqube'],
-      require      => [ File["${installroot}/${package_name}-${version}"], Package['unzip'],
-                        Sonarqube::Move_to_home['data', 'extras', 'extensions', 'logs'] ],
-    }
-
-    # ensure install directory exists
-    # also create data directories and symlink them before extracting archive
-    # otherwise symlink will fail b/c target will already exist
-    file { "${installroot}/${package_name}-${version}":
-      ensure => directory,
-    }
-
-    file { $installdir:
-      ensure  => link,
-      target  => "${installroot}/${package_name}-${version}",
-      notify  => Service['sonarqube'],
-      require => File["${installroot}/${package_name}-${version}"],
-    }
-
-    file { $plugin_dir:
-      ensure  => directory,
-      require => Sonarqube::Move_to_home['extensions'],
-    }
-  }   # end installation
-
-  # Sonar configuration files
-
-  $real_require = $use_package ? {
-    true  => "Package[${package_name}]",
-    false => "Archive[${tmpzip}]",
-  }
-
-  if $config != undef {
-    file { "${installdir}/conf/sonar.properties":
-      source  => $config,
-      notify  => Service['sonarqube'],
-      mode    => '0600',
-      require => $real_require,
-    }
-  } else {
-    file { "${installdir}/conf/sonar.properties":
-      ensure  => file,
-      content => template('sonarqube/sonar.properties.erb'),
-      notify  => Service['sonarqube'],
-      mode    => '0600',
-      require => $real_require,
-    }
-  }
-
-  file { $script:
-    ensure  => file,
-    mode    => '0755',
-    content => template('sonarqube/sonar.sh.erb'),
-    require => $real_require,
-  }
-
-  file { "/etc/init.d/${service}":
-    ensure  => link,
-    target  => $script,
-    require => $real_require,
-  }
-
-  if $::systemd {
-    systemd::unit_file{"${service}.service":
-      path    => '/usr/lib/systemd/system/',
-      content => template("${module_name}/sonarqube.systemd.erb"),
-      before  => Service['sonarqube'],
-    }
-  }
-
-  $_service_require = $use_package ? {
-    true  => [ Package[$package_name], File["/etc/init.d/${service}"] ],
-    false => [ Archive[$tmpzip], File["/etc/init.d/${service}"] ],
-  }
-
-  service { 'sonarqube':
-    ensure     => running,
-    name       => $service,
-    hasrestart => true,
-    hasstatus  => true,
-    enable     => true,
-    require    => $_service_require,
-  }
+  class { '::sonarqube::account' }->
+  class { '::sonarqube::package' }->
+  class { '::sonarqube::config' }->
+  class { '::sonarqube::service' }
 }
