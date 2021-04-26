@@ -4,7 +4,6 @@ Puppet-SonarQube
 
 A puppet recipe to install SonarQube (former Sonar)
 
-
 # Usage
 
     class { 'java': }
@@ -43,6 +42,7 @@ or
     }
 
 When defining https\_proxy and/or https\_proxy settings, following rules are forced :
+
 * http\_proxy.port and https\_proxy.port cannot be the same
 * both host and port must be set and cannot be an empty string
 
@@ -61,7 +61,6 @@ The `sonarqube::plugin` defined type can also be used to install SonarQube plugi
       version    => '0.1',
       notify     => Service['sonar'],
     }
-    
 
 ### LDAP Plugin
 
@@ -80,7 +79,6 @@ The `sonarqube` class actually includes "built-in" support for the LDAP plugin t
       ldap => $ldap,
     }
 
-
 # Module Requirements
 
 * puppet/archive
@@ -89,16 +87,16 @@ The `sonarqube` class actually includes "built-in" support for the LDAP plugin t
 
 # License
 
-    Copyright 2011-2013 MaestroDev, Inc
+Copyright 2011-2013 MaestroDev, Inc
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-        http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
