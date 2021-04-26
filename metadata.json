@@ -7,7 +7,6 @@
   "source": "http://github.com/maestrodev/puppet-sonarqube",
   "project_page": "http://github.com/maestrodev/puppet-sonarqube",
   "issues_url": "https://github.com/maestrodev/puppet-sonarqube/issues",
-  "description": "A module to install and configure SonarQube (former Sonar)",
   "dependencies": [
     {
       "name": "maestrodev/maven",
@@ -138,5 +137,9 @@
       "name": "puppet",
       "version_requirement": ">=3.5"
     }
-  ]
+  ],
+  "description": "A module to install and configure SonarQube (former Sonar)",
+  "pdk-version": "2.1.0",
+  "template-url": "pdk-default#2.1.0",
+  "template-ref": "tags/2.1.0-0-ga675ea5"
 }
