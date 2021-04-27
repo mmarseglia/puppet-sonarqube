@@ -273,7 +273,7 @@ class sonarqube (
     ensure => directory,
     mode   => '0700',
   }
-  
+
   if $use_package {
     $installdir = "${packageroot}/${service}"
     $extensions_dir = "${installdir}/extensions"
@@ -290,7 +290,6 @@ class sonarqube (
   # /usr/local/sonar/bin/linux-x86-64/
   $script = "${installdir}/bin/${arch}/sonar.sh"
 
-  
   if $use_package {
     # package based installation
     if $manage_repo {

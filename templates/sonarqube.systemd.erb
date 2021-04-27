@@ -1,15 +1,19 @@
 [Unit]
-Description=<%= @service.capitalize %>
-After=network.target network-online.target
-Wants=network-online.target
+Description=SonarQube service
+After=syslog.target network.target
 
 [Service]
-ExecStart=<%= @script %> start
-ExecStop=<%= @script %> stop
-ExecReload=<%= @script %> restart
-PIDFile=<%= @home %>/<%= @service %>.pid
-Type=forking
+Type=simple
 User=<%= @user %>
+Group=<%= @group %>
+PermissionsStartOnly=true
+ExecStart=/bin/nohup /usr/bin/java -Xms32m -Xmx32m -Djava.net.preferIPv4Stack=true -jar ${installdir}/lib/sonar-application-<%= @version =%>.jar
+StandardOutput=syslog
+LimitNOFILE=131072
+LimitNPROC=8192
+TimeoutStartSec=5
+Restart=always
+SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target
