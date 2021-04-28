@@ -7,7 +7,7 @@ Type=simple
 User=<%= @user %>
 Group=<%= @group %>
 PermissionsStartOnly=true
-ExecStart=/bin/nohup /usr/bin/java -Xms32m -Xmx32m -Djava.net.preferIPv4Stack=true -jar ${installdir}/lib/sonar-application-<%= @version %>.jar
+ExecStart=/bin/nohup /usr/bin/java -Xms32m -Xmx32m -Djava.net.preferIPv4Stack=true -jar <%= @installdir %>/lib/sonar-application-<%= @version %>.jar
 StandardOutput=syslog
 LimitNOFILE=131072
 LimitNPROC=8192
